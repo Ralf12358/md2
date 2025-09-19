@@ -426,20 +426,25 @@ nav#TOC,
         --math-scale: var(--print-math-scale);
     }
 
-    /* Keep common block elements intact on a page when possible */
+    /* Keep small/atomic blocks intact; allow tables/lists to split to avoid large gaps */
     pre,
     blockquote,
-    table,
     figure,
     img,
     svg,
-    ul,
-    ol,
-    li,
     .sourceCode,
     .math.display {
         break-inside: avoid;
         page-break-inside: avoid;
+    }
+
+    /* Let big content flow across pages (prevents stranded headings and huge whitespace) */
+    table,
+    ul,
+    ol,
+    li {
+        break-inside: auto;
+        page-break-inside: auto;
     }
 
     /* Limit diagram height in print to prevent spanning multiple pages */
@@ -596,7 +601,7 @@ nav#TOC,
         page-break-inside: avoid;
     }
 
-    /* Stronger protection for common large blocks after a heading (exclude first H1) */
+    /* Keep headings with the start of the following block, but allow that block to split */
     h1:not(:first-of-type)+.math.display,
     h2+.math.display,
     h3+.math.display,
@@ -645,9 +650,11 @@ nav#TOC,
     h4+ol,
     h5+ol,
     h6+ol {
+        /* Keep with next when possible */
         break-before: avoid-page;
         page-break-before: avoid;
-        break-inside: avoid-page;
-        page-break-inside: avoid;
+        /* Allow the following block to split across pages if needed */
+        break-inside: auto;
+        page-break-inside: auto;
     }
 }
