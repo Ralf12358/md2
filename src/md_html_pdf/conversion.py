@@ -61,7 +61,16 @@ def md_to_html(
 
         cmd = [runtime, "run", "--rm"]
         cmd += rt.get_user_args(runtime)
-        cmd += ["-v", f"{in_dir}:/work", "-v", f"{_styles_dir()}:/styles:ro"]
+        cmd += [
+            "-v",
+            f"{in_dir}:/work",
+            "-v",
+            f"{_styles_dir()}:/styles:ro",
+            "-v",
+            f"{rt.project_root()}/docker/filters:/filters:ro",
+            "-v",
+            f"{rt.project_root()}/docker/md2html.sh:/usr/local/bin/md2html.sh:ro",
+        ]
         cmd += css_mount
         if self_contained:
             cmd += ["-e", "INTERNAL_RESOURCES=1", "-e", "LINK_CSS=0"]
@@ -74,7 +83,7 @@ def md_to_html(
                 cmd += ["-e", f"INTERNAL_RESOURCES={internal}"]
         cmd.append(rt.IMAGE_NAME)
 
-        inner = ["/usr/local/bin/md2html.sh", container_in, container_out]
+        inner = ["bash", "/usr/local/bin/md2html.sh", container_in, container_out]
         if css_arg:
             inner.append(css_arg)
 
@@ -97,9 +106,9 @@ def md_to_html(
         if html_css:
             inner.extend([f"--html-css={html_css}"])
 
-        cmd += inner
-        subprocess.run(cmd, check=True)
-        results.append(out_abs)
+    cmd += inner
+    subprocess.run(cmd, check=True)
+    results.append(out_abs)
     return results
 
 
@@ -189,7 +198,16 @@ def md_to_pdf(
 
         cmd = [runtime, "run", "--rm"]
         cmd += rt.get_user_args(runtime)
-        cmd += ["-v", f"{in_dir}:/work", "-v", f"{_styles_dir()}:/styles:ro"]
+        cmd += [
+            "-v",
+            f"{in_dir}:/work",
+            "-v",
+            f"{_styles_dir()}:/styles:ro",
+            "-v",
+            f"{rt.project_root()}/docker/filters:/filters:ro",
+            "-v",
+            f"{rt.project_root()}/docker/md2html.sh:/usr/local/bin/md2html.sh:ro",
+        ]
         cmd += css_mount
         if self_contained:
             cmd += ["-e", "INTERNAL_RESOURCES=1", "-e", "LINK_CSS=0"]
@@ -203,7 +221,12 @@ def md_to_pdf(
         cmd.append(rt.IMAGE_NAME)
 
         # Build the command to run both conversions in sequence
-        md2html_cmd = ["/usr/local/bin/md2html.sh", container_in, container_html]
+        md2html_cmd = [
+            "bash",
+            "/usr/local/bin/md2html.sh",
+            container_in,
+            container_html,
+        ]
         if css_arg:
             md2html_cmd.append(css_arg)
 
@@ -233,9 +256,9 @@ def md_to_pdf(
             ]
         )
 
-        cmd += ["sh", "-c", inner_cmd]
-        subprocess.run(cmd, check=True)
-        results.append(out_abs)
+    cmd += ["sh", "-c", inner_cmd]
+    subprocess.run(cmd, check=True)
+    results.append(out_abs)
     return results
 
 
