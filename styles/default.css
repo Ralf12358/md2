@@ -426,25 +426,20 @@ nav#TOC,
         --math-scale: var(--print-math-scale);
     }
 
-    /* Keep small/atomic blocks intact; allow tables/lists to split to avoid large gaps */
+    /* Keep common block elements intact on a page when possible */
     pre,
     blockquote,
+    table,
     figure,
     img,
     svg,
+    ul,
+    ol,
+    li,
     .sourceCode,
     .math.display {
         break-inside: avoid;
         page-break-inside: avoid;
-    }
-
-    /* Let big content flow across pages (prevents stranded headings and huge whitespace) */
-    table,
-    ul,
-    ol,
-    li {
-        break-inside: auto;
-        page-break-inside: auto;
     }
 
     /* Limit diagram height in print to prevent spanning multiple pages */
@@ -601,13 +596,43 @@ nav#TOC,
         page-break-inside: avoid;
     }
 
-    /* Keep headings with small following blocks only (paragraphs/lists). Avoid holding with large blocks like tables/figures/pre/math. */
-    h1:not(:first-of-type)+p,
-    h2+p,
-    h3+p,
-    h4+p,
-    h5+p,
-    h6+p,
+    /* Stronger protection for common large blocks after a heading (exclude first H1) */
+    h1:not(:first-of-type)+.math.display,
+    h2+.math.display,
+    h3+.math.display,
+    h4+.math.display,
+    h5+.math.display,
+    h6+.math.display,
+    h1:not(:first-of-type)+.katex-display,
+    h2+.katex-display,
+    h3+.katex-display,
+    h4+.katex-display,
+    h5+.katex-display,
+    h6+.katex-display,
+    h1:not(:first-of-type)+.mjx-container[display="true"],
+    h2+.mjx-container[display="true"],
+    h3+.mjx-container[display="true"],
+    h4+.mjx-container[display="true"],
+    h5+.mjx-container[display="true"],
+    h6+.mjx-container[display="true"],
+    h1:not(:first-of-type)+pre,
+    h2+pre,
+    h3+pre,
+    h4+pre,
+    h5+pre,
+    h6+pre,
+    h1:not(:first-of-type)+table,
+    h2+table,
+    h3+table,
+    h4+table,
+    h5+table,
+    h6+table,
+    h1:not(:first-of-type)+figure,
+    h2+figure,
+    h3+figure,
+    h4+figure,
+    h5+figure,
+    h6+figure,
     h1:not(:first-of-type)+ul,
     h2+ul,
     h3+ul,
@@ -620,26 +645,12 @@ nav#TOC,
     h4+ol,
     h5+ol,
     h6+ol {
-        /* Keep with next when possible */
         break-before: avoid-page;
         page-break-before: avoid;
-        /* Allow the following block to split across pages if needed */
-        break-inside: auto;
-        page-break-inside: auto;
-    }
-
-    /* Reduce widow/orphan constraints for the first paragraph after a heading */
-    h1:not(:first-of-type)+p,
-    h2+p,
-    h3+p,
-    h4+p,
-    h5+p,
-    h6+p {
-        widows: 1;
-        orphans: 1;
+        break-inside: avoid-page;
+        page-break-inside: avoid;
     }
 }
-
 /* Print: top-priority rule — never break at headings */
 @media print {
 
@@ -653,5 +664,21 @@ nav#TOC,
         page-break-before: avoid;
         break-inside: avoid-page;
         page-break-inside: avoid;
+    }
+}
+
+/* Print: allow TOC to split across pages (override global list rules) */
+@media print {
+    nav#TOC ul,
+    nav#TOC ol,
+    nav#TOC li,
+    #TOC ul,
+    #TOC ol,
+    #TOC li,
+    .toc ul,
+    .toc ol,
+    .toc li {
+        break-inside: auto;
+        page-break-inside: auto;
     }
 }
