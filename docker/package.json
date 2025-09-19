@@ -1,0 +1,10 @@
+{
+    "name": "html2pdf",
+    "version": "1.0.0",
+    "description": "Render HTML to PDF using Puppeteer",
+    "main": "print.js",
+    "dependencies": {
+        "puppeteer": "24.10.2",
+        "minimist": "1.2.8"
+    }
+}

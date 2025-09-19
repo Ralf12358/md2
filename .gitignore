@@ -1,0 +1,81 @@
+examples/*.html
+examples/*.pdf
+examples/*.css
+
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+/.venv/
+/tmp_test_data/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+/.venv/
+/tmp_test_data/
+examples/doc.html
+examples/doc.pdf
+examples/.mermaid/
+examples/mermaid-images/
+
+# Root-level temp or cache (should not be produced anymore)
+.mermaid/
+mermaid-images/
+tmp/
+.tmp/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node/npm
+node_modules/
+.npm/
+.npmrc
+npm-debug.log*
+yarn-error.log*
+.pnpm-store/
+
+# Python (generic)
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Local caches & temp
+.cache/
+.tmp/
+tmp/
+.tmp_test_data/
+tmp_test_data/
+
+# Mermaid & generated images
+.mermaid/
+mermaid-images/
+
+# Docker
+*.tar
+
+# Logs
+*.log
+
+# Env files
+.env
+.env.*
+
+# Common build outputs (keep html/pdf tracked if added intentionally)
+dist/
+build/

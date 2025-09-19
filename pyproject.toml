@@ -1,0 +1,22 @@
+[project]
+name = "md2"
+version = "0.4.0"
+description = "Markdown -> HTML -> PDF via Podman/Docker (pandoc+mermaid+mathjax+puppeteer)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Ralf Schneider" }]
+dependencies = ["aimport>=0.13.1", "pytest-timeout>=2.2.0"]
+
+[project.scripts]
+md2html = "md_html_pdf.cli:main_md2html"
+md2pdf = "md_html_pdf.cli:main_md2pdf"
+html2pdf = "md_html_pdf.cli:main_html2pdf"
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+addopts = "-q --timeout=10"
+testpaths = ["src/tests"]
