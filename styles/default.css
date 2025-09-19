@@ -445,9 +445,11 @@ nav#TOC,
     /* Limit diagram height in print to prevent spanning multiple pages */
     img,
     svg {
-        max-height: 85vh; /* Roughly 85% of viewport height */
+        max-height: 85vh;
+        /* Roughly 85% of viewport height */
         /* Alternative: limit to ~150% of page width */
-        max-height: min(85vh, 135mm); /* 135mm ≈ 150% of typical page width */
+        max-height: min(85vh, 135mm);
+        /* 135mm ≈ 150% of typical page width */
     }
 
     /* Rows shouldn't break individually */
