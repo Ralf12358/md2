@@ -1,20 +1,21 @@
 import subprocess
 from pathlib import Path
+from typing import List, Optional, Union
 from . import runtime as rt
 import os
 
 
 def md_to_html(
-    input_paths,
-    css=None,
-    dialect="pandoc",
-    markdown_flags=None,
-    html_title=None,
-    html_css=None,
-    runtime=None,
-    ensure=True,
-    self_contained=True,  # Default True: embeds MathJax + resources for offline use
-):
+    input_paths: List[Union[str, Path]],
+    css: Optional[str] = None,
+    dialect: str = "pandoc",
+    markdown_flags: Optional[List[str]] = None,
+    html_title: Optional[str] = None,
+    html_css: Optional[str] = None,
+    runtime: Optional[str] = None,
+    ensure: bool = True,
+    self_contained: bool = True,  # Default True: embeds MathJax + resources for offline use
+) -> List[Path]:
     if markdown_flags is None:
         markdown_flags = ["--toc"]  # TOC enabled by default
 
@@ -112,7 +113,7 @@ def md_to_html(
     return results
 
 
-def html_to_pdf(input_paths, runtime=None, ensure=True):
+def html_to_pdf(input_paths: List[Union[str, Path]], runtime: Optional[str] = None, ensure: bool = True) -> List[Path]:
     runtime = runtime or rt.get_container_runtime()
     if ensure:
         rt.ensure_image(runtime, rt.project_root())
@@ -141,16 +142,16 @@ def html_to_pdf(input_paths, runtime=None, ensure=True):
 
 
 def md_to_pdf(
-    input_paths,
-    css=None,
-    dialect="pandoc",
-    markdown_flags=None,
-    html_title=None,
-    html_css=None,
-    runtime=None,
-    ensure=True,
-    self_contained=True,  # Default True: embeds MathJax + resources for offline use
-):
+    input_paths: List[Union[str, Path]],
+    css: Optional[str] = None,
+    dialect: str = "pandoc",
+    markdown_flags: Optional[List[str]] = None,
+    html_title: Optional[str] = None,
+    html_css: Optional[str] = None,
+    runtime: Optional[str] = None,
+    ensure: bool = True,
+    self_contained: bool = True,  # Default True: embeds MathJax + resources for offline use
+) -> List[Path]:
     if markdown_flags is None:
         markdown_flags = ["--toc"]  # TOC enabled by default
 
@@ -262,5 +263,5 @@ def md_to_pdf(
     return results
 
 
-def _styles_dir():
+def _styles_dir() -> Path:
     return rt.project_root() / "styles"

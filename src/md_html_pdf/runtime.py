@@ -2,11 +2,12 @@ import subprocess
 import shutil
 import os
 from pathlib import Path
+from typing import List
 
 IMAGE_NAME = "md2:latest"
 
 
-def get_container_runtime():
+def get_container_runtime() -> str:
     # Allow override via environment variable
     env_choice = os.environ.get("RUNTIME")
     if env_choice in ("podman", "docker") and shutil.which(env_choice):
@@ -18,7 +19,7 @@ def get_container_runtime():
     raise RuntimeError("Neither docker nor podman found")
 
 
-def get_user_args(runtime: str):
+def get_user_args(runtime: str) -> List[str]:
     if runtime == "podman":
         args = ["--userns=keep-id"]
         # Prefer slirp4netns if available, otherwise avoid pasta by using host
@@ -30,19 +31,19 @@ def get_user_args(runtime: str):
     return ["--user", f"{_uid()}:{_gid()}"]
 
 
-def _uid():
+def _uid() -> int:
     import os
 
     return os.getuid()
 
 
-def _gid():
+def _gid() -> int:
     import os
 
     return os.getgid()
 
 
-def image_exists(runtime: str, image: str = IMAGE_NAME):
+def image_exists(runtime: str, image: str = IMAGE_NAME) -> bool:
     r = subprocess.run(
         [runtime, "image", "inspect", image],
         stdout=subprocess.DEVNULL,
@@ -51,7 +52,7 @@ def image_exists(runtime: str, image: str = IMAGE_NAME):
     return r.returncode == 0
 
 
-def ensure_image(runtime: str, context_dir: Path):
+def ensure_image(runtime: str, context_dir: Path) -> None:
     if image_exists(runtime):
         return
     subprocess.run(
@@ -61,5 +62,5 @@ def ensure_image(runtime: str, context_dir: Path):
     )
 
 
-def project_root():
+def project_root() -> Path:
     return Path(__file__).resolve().parent.parent.parent

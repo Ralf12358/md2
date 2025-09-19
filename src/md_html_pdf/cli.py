@@ -1,9 +1,10 @@
 import sys
 from pathlib import Path
+from typing import List, Optional
 from .conversion import md_to_html, md_to_pdf, html_to_pdf
 
 
-def usage_md2html():
+def usage_md2html() -> None:
     usage = """Usage: md2html [options] file1.md [file2.md ...]
 
 Markdown dialect options:
@@ -56,7 +57,7 @@ HTML generator options:
     sys.exit(1)
 
 
-def main_md2html(argv=None):
+def main_md2html(argv: Optional[List[str]] = None) -> None:
     if argv is None:
         argv = sys.argv[1:]
 
@@ -140,7 +141,7 @@ def main_md2html(argv=None):
     )
 
 
-def usage_md2pdf():
+def usage_md2pdf() -> None:
     usage = """Usage: md2pdf [options] file1.md [file2.md ...]
 
 Markdown dialect options:
@@ -193,7 +194,7 @@ HTML generator options:
     sys.exit(1)
 
 
-def main_md2pdf(argv=None):
+def main_md2pdf(argv: Optional[List[str]] = None) -> None:
     if argv is None:
         argv = sys.argv[1:]
 
@@ -277,12 +278,12 @@ def main_md2pdf(argv=None):
     )
 
 
-def usage_html2pdf():
+def usage_html2pdf() -> None:
     print("Usage: html2pdf file1.html [file2.html ...]", file=sys.stderr)
     sys.exit(1)
 
 
-def main_html2pdf(argv=None):
+def main_html2pdf(argv: Optional[List[str]] = None) -> None:
     if argv is None:
         argv = sys.argv[1:]
 
