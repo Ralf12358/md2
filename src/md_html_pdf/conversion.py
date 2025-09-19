@@ -113,7 +113,11 @@ def md_to_html(
     return results
 
 
-def html_to_pdf(input_paths: List[Union[str, Path]], runtime: Optional[str] = None, ensure: bool = True) -> List[Path]:
+def html_to_pdf(
+    input_paths: List[Union[str, Path]],
+    runtime: Optional[str] = None,
+    ensure: bool = True,
+) -> List[Path]:
     runtime = runtime or rt.get_container_runtime()
     if ensure:
         rt.ensure_image(runtime, rt.project_root())
