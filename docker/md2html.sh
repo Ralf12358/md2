@@ -276,3 +276,41 @@ PY
     }
   ' "$OUT" > "$tmpfile" && mv "$tmpfile" "$OUT" || rm -f "$tmpfile" || true
 fi
+
+# If TOC is enabled, add inline backlinks to TOC on all section headings (h2–h6).
+if [[ "$ENABLE_TOC" == "1" && -f "$OUT" ]]; then
+  python3 - "$OUT" <<'PY' || true
+import io, re, sys
+
+path = sys.argv[1]
+try:
+  with io.open(path, 'r', encoding='utf-8') as f:
+    s = f.read()
+except Exception:
+  sys.exit(0)
+
+# Only proceed if a TOC anchor exists
+if re.search(r'<nav\b[^>]*\bid\s*=\s*[\"\']TOC[\"\']', s, flags=re.I) is None:
+  sys.exit(0)
+
+def add_backlink(html):
+  # Append backlink inside closing tag of h2..h6 if not already present
+  def repl(m):
+    tag = m.group('tag')
+    inner = m.group('inner')
+    # Skip if a toc-back link already exists within the header
+    if 'class="toc-back"' in inner or "class='toc-back'" in inner:
+      return m.group(0)
+    link = '<a class="toc-back" href="#TOC" aria-label="Back to table of contents">⇧ TOC</a>'
+    return f"<h{tag}{m.group('attrs')}>{inner}{link}</h{tag}>"
+
+  # Regex matching header start and end with minimal inner capture
+  pattern = re.compile(r"<h(?P<tag>[2-6])(?P<attrs>[^>]*)>(?P<inner>.*?)</h(?P=tag)>", re.I | re.S)
+  return pattern.sub(repl, html)
+
+s2 = add_backlink(s)
+if s2 != s:
+  with io.open(path, 'w', encoding='utf-8') as f:
+    f.write(s2)
+PY
+fi

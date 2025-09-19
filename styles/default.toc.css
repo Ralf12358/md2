@@ -578,6 +578,33 @@ nav#TOC ul,
     padding-left: 0;
 }
 
+/* Backlink to TOC appended to headings */
+.toc-back {
+        font-size: 0.8em;
+        margin-left: 0.6em;
+        color: var(--color-muted);
+        text-decoration: none;
+        opacity: 0;
+        transition: opacity 0.15s ease-in-out;
+}
+/* Reveal on hover/focus for accessibility */
+h2:hover .toc-back,
+h3:hover .toc-back,
+h4:hover .toc-back,
+h5:hover .toc-back,
+h6:hover .toc-back,
+.toc-back:focus,
+.toc-back:focus-visible,
+h2:focus-within .toc-back,
+h3:focus-within .toc-back,
+h4:focus-within .toc-back,
+h5:focus-within .toc-back,
+h6:focus-within .toc-back { opacity: 1; }
+.toc-back:hover { text-decoration: underline; }
+@media print {
+    .toc-back { display: none !important; }
+}
+
 nav#TOC li,
 #TOC li,
 .toc li {
