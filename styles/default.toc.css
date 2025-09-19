@@ -700,6 +700,21 @@ nav#TOC>ul>li>ul>li>ul>li::before,
     }
 }
 
+/* Print: top-priority rule — never break at headings */
+@media print {
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        break-before: avoid-page;
+        page-break-before: avoid;
+        break-inside: avoid-page;
+        page-break-inside: avoid;
+    }
+}
+
 @media print {
 
     /* Smart keep-with-next for headings: keep heading with first block (exclude first H1) */
@@ -715,43 +730,13 @@ nav#TOC>ul>li>ul>li>ul>li::before,
         page-break-inside: avoid;
     }
 
-    /* Keep headings with the start of the following block, but allow that block to split */
-    h1:not(:first-of-type)+.math.display,
-    h2+.math.display,
-    h3+.math.display,
-    h4+.math.display,
-    h5+.math.display,
-    h6+.math.display,
-    h1:not(:first-of-type)+.katex-display,
-    h2+.katex-display,
-    h3+.katex-display,
-    h4+.katex-display,
-    h5+.katex-display,
-    h6+.katex-display,
-    h1:not(:first-of-type)+.mjx-container[display="true"],
-    h2+.mjx-container[display="true"],
-    h3+.mjx-container[display="true"],
-    h4+.mjx-container[display="true"],
-    h5+.mjx-container[display="true"],
-    h6+.mjx-container[display="true"],
-    h1:not(:first-of-type)+pre,
-    h2+pre,
-    h3+pre,
-    h4+pre,
-    h5+pre,
-    h6+pre,
-    h1:not(:first-of-type)+table,
-    h2+table,
-    h3+table,
-    h4+table,
-    h5+table,
-    h6+table,
-    h1:not(:first-of-type)+figure,
-    h2+figure,
-    h3+figure,
-    h4+figure,
-    h5+figure,
-    h6+figure,
+    /* Keep headings with small following blocks only (paragraphs/lists). Avoid holding with large blocks like tables/figures/pre/math. */
+    h1:not(:first-of-type)+p,
+    h2+p,
+    h3+p,
+    h4+p,
+    h5+p,
+    h6+p,
     h1:not(:first-of-type)+ul,
     h2+ul,
     h3+ul,
@@ -770,5 +755,16 @@ nav#TOC>ul>li>ul>li>ul>li::before,
         /* Allow the following block to split across pages if needed */
         break-inside: auto;
         page-break-inside: auto;
+    }
+
+    /* Reduce widow/orphan constraints for the first paragraph after a heading */
+    h1:not(:first-of-type)+p,
+    h2+p,
+    h3+p,
+    h4+p,
+    h5+p,
+    h6+p {
+        widows: 1;
+        orphans: 1;
     }
 }
