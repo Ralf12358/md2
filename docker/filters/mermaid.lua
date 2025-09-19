@@ -28,7 +28,7 @@ local function mermaid_image(code, ext)
   f:write(code)
   f:close()
   local ok, err = pcall(function()
-    pandoc.pipe('mermaid', {'-i', infile, '-o', outfile, '-b', 'transparent'}, '')
+    pandoc.pipe('mermaid', {'-i', infile, '-o', outfile, '-b', 'transparent', '-s', '4'}, '')
   end)
   os.remove(infile)
   if not ok then
