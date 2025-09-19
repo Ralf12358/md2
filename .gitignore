@@ -3,6 +3,7 @@ examples/*.pdf
 examples/*.docx
 examples/*.css
 
+.playwright-mcp
 __pycache__/
 *.pyc
 *.pyo

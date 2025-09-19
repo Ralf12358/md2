@@ -23,6 +23,7 @@ INTERNAL_RESOURCES="${INTERNAL_RESOURCES:-0}"
 INPUT_FORMAT="markdown+tex_math_dollars+tex_math_single_backslash+smart+emoji+footnotes+definition_lists+fenced_code_attributes+link_attributes+task_lists+strikeout+pipe_tables+table_captions+auto_identifiers+implicit_header_references"
 EXTRA_CSS_LINKS=()
 HTML_TITLE=""
+DOC_TITLE=""
 ENABLE_TOC=0
 TOC_DEPTH=""
 
@@ -46,6 +47,9 @@ while [[ $# -gt 0 ]]; do
       ;;
     --html-title=*)
       HTML_TITLE="${1#--html-title=}"
+      ;;
+    --doc-title=*)
+      DOC_TITLE="${1#--doc-title=}"
       ;;
     --html-css=*)
       EXTRA_CSS_LINKS+=("${1#--html-css=}")
@@ -87,6 +91,8 @@ OPTS=(
 # Title metadata (if provided)
 if [[ -n "$HTML_TITLE" ]]; then
   OPTS+=(--metadata=pagetitle:"$HTML_TITLE")
+elif [[ -n "$DOC_TITLE" ]]; then
+  OPTS+=(--metadata=pagetitle:"$DOC_TITLE")
 else
   OPTS+=(--metadata=pagetitle:"$PAGE_TITLE")
 fi

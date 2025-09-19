@@ -1,9 +1,100 @@
 from aimport import *
 import subprocess
+import re
+import tempfile
 from pathlib import Path
 from typing import List, Optional, Union
 from . import runtime as rt
 import os
+
+
+def count_h1_headers(file_path: Union[str, Path]) -> int:
+    """Count the number of H1 headers in a markdown file."""
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # Count ATX-style headers (# Header)
+        atx_count = len(re.findall(r"^# .*$", content, re.MULTILINE))
+
+        # Count Setext-style headers (underlined with =)
+        setext_count = len(re.findall(r"^.+\n=+\s*$", content, re.MULTILINE))
+
+        return atx_count + setext_count
+    except Exception:
+        return 0
+
+
+def extract_first_h1_title(file_path: Union[str, Path]) -> Optional[str]:
+    """Extract the text of the first H1 header in a markdown file."""
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # Look for ATX-style header first (# Header)
+        atx_match = re.search(r"^# (.+)$", content, re.MULTILINE)
+        if atx_match:
+            return atx_match.group(1).strip()
+
+        # Look for Setext-style header (underlined with =)
+        setext_match = re.search(r"^(.+)\n=+\s*$", content, re.MULTILINE)
+        if setext_match:
+            return setext_match.group(1).strip()
+
+        return None
+    except Exception:
+        return None
+
+
+def shift_headings_and_add_title(file_path: Union[str, Path], title: str) -> str:
+    """
+    Shift all headings down by one level and add a title H1 at the top.
+    Returns the modified markdown content.
+    """
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # Shift ATX-style headers (add one # to each)
+        content = re.sub(r"^(#{1,6}) ", r"#\1 ", content, flags=re.MULTILINE)
+
+        # Shift Setext-style headers (convert to ATX and shift)
+        # H1 (===) becomes H2 (##)
+        content = re.sub(r"^(.+)\n=+\s*$", r"## \1", content, flags=re.MULTILINE)
+        # H2 (---) becomes H3 (###)
+        content = re.sub(r"^(.+)\n-+\s*$", r"### \1", content, flags=re.MULTILINE)
+
+        # Add title H1 at the top
+        modified_content = f"# {title}\n\n{content}"
+
+        return modified_content
+
+    except Exception:
+        # If anything fails, return original content
+        with open(file_path, "r", encoding="utf-8") as f:
+            return f.read()
+
+
+def determine_document_title(
+    file_path: Union[str, Path], title_override: Optional[str] = None
+) -> str:
+    """
+    Determine the document title based on the following priority:
+    1. title_override (--title parameter)
+    2. If exactly one H1 header exists, use its text
+    3. Otherwise, use the filename stem
+    """
+    if title_override:
+        return title_override
+
+    h1_count = count_h1_headers(file_path)
+    if h1_count == 1:
+        first_h1 = extract_first_h1_title(file_path)
+        if first_h1:
+            return first_h1
+
+    # Fallback to filename stem
+    return Path(file_path).stem
 
 
 def md2html(
@@ -12,6 +103,7 @@ def md2html(
     dialect: str = "pandoc",
     markdown_flags: Optional[List[str]] = None,
     html_title: Optional[str] = None,
+    title: Optional[str] = None,
     html_css: Optional[str] = None,
     runtime: Optional[str] = None,
     ensure: bool = True,
@@ -48,7 +140,27 @@ def md2html(
         abs_in = p.resolve()
         out_abs = abs_in.with_suffix(".html")
         in_dir = abs_in.parent
-        container_in = f"/work/{abs_in.name}"
+
+        # Determine the actual title to use
+        actual_title = determine_document_title(abs_in, title)
+
+        # Handle multiple H1s by shifting headings and adding title
+        h1_count = count_h1_headers(abs_in)
+        temp_file = None
+        if h1_count > 1:
+            # Create temporary file with shifted headings
+            modified_content = shift_headings_and_add_title(abs_in, actual_title)
+            temp_file = tempfile.NamedTemporaryFile(
+                mode="w", suffix=".md", delete=False, dir=in_dir
+            )
+            temp_file.write(modified_content)
+            temp_file.close()
+
+            # Use the temporary file for conversion
+            container_in = f"/work/{Path(temp_file.name).name}"
+        else:
+            container_in = f"/work/{abs_in.name}"
+
         container_out = f"/work/{out_abs.name}"
 
         css_mount = []
@@ -102,14 +214,30 @@ def md2html(
         if markdown_flags:
             inner.extend(markdown_flags)
 
-        # Add HTML options
-        if html_title:
+        # Add HTML options - priority: title > html_title > auto-detected title
+        if title:
+            # --title overrides everything for HTML title
+            inner.extend([f"--html-title={actual_title}"])
+        elif html_title:
+            # --html-title only overrides auto-detection if --title not specified
             inner.extend([f"--html-title={html_title}"])
+        else:
+            # Use auto-detected title
+            inner.extend([f"--html-title={actual_title}"])
+
+        # Pass the determined title for other purposes (like PDF titles)
+        inner.extend([f"--doc-title={actual_title}"])
+
         if html_css:
             inner.extend([f"--html-css={html_css}"])
 
     cmd += inner
     subprocess.run(cmd, check=True)
+
+    # Clean up temporary file if created
+    if temp_file and os.path.exists(temp_file.name):
+        os.unlink(temp_file.name)
+
     results.append(out_abs)
     return results
 
@@ -152,6 +280,7 @@ def md2pdf(
     dialect: str = "pandoc",
     markdown_flags: Optional[List[str]] = None,
     html_title: Optional[str] = None,
+    title: Optional[str] = None,
     html_css: Optional[str] = None,
     runtime: Optional[str] = None,
     ensure: bool = True,
@@ -188,7 +317,27 @@ def md2pdf(
         abs_in = p.resolve()
         out_abs = abs_in.with_suffix(".pdf")
         in_dir = abs_in.parent
-        container_in = f"/work/{abs_in.name}"
+
+        # Determine the actual title to use
+        actual_title = determine_document_title(abs_in, title)
+
+        # Handle multiple H1s by shifting headings and adding title
+        h1_count = count_h1_headers(abs_in)
+        temp_file = None
+        if h1_count > 1:
+            # Create temporary file with shifted headings
+            modified_content = shift_headings_and_add_title(abs_in, actual_title)
+            temp_file = tempfile.NamedTemporaryFile(
+                mode="w", suffix=".md", delete=False, dir=in_dir
+            )
+            temp_file.write(modified_content)
+            temp_file.close()
+
+            # Use the temporary file for conversion
+            container_in = f"/work/{Path(temp_file.name).name}"
+        else:
+            container_in = f"/work/{abs_in.name}"
+
         container_html = f"/tmp/{abs_in.stem}.html"
         container_out = f"/work/{out_abs.name}"
 
@@ -248,9 +397,20 @@ def md2pdf(
         if markdown_flags:
             md2html_cmd.extend(markdown_flags)
 
-        # Add HTML options
-        if html_title:
+        # Add HTML options - priority: title > html_title > auto-detected title
+        if title:
+            # --title overrides everything for HTML title
+            md2html_cmd.extend([f"--html-title={actual_title}"])
+        elif html_title:
+            # --html-title only overrides auto-detection if --title not specified
             md2html_cmd.extend([f"--html-title={html_title}"])
+        else:
+            # Use auto-detected title
+            md2html_cmd.extend([f"--html-title={actual_title}"])
+
+        # Pass the determined title for other purposes (like PDF titles)
+        md2html_cmd.extend([f"--doc-title={actual_title}"])
+
         if html_css:
             md2html_cmd.extend([f"--html-css={html_css}"])
 
@@ -264,6 +424,11 @@ def md2pdf(
 
     cmd += ["sh", "-c", inner_cmd]
     subprocess.run(cmd, check=True)
+
+    # Clean up temporary file if created
+    if temp_file and os.path.exists(temp_file.name):
+        os.unlink(temp_file.name)
+
     results.append(out_abs)
     return results
 
@@ -276,6 +441,7 @@ def md2docx(
     input_paths: List[Union[str, Path]],
     dialect: str = "pandoc",
     markdown_flags: Optional[List[str]] = None,
+    title: Optional[str] = None,
     reference_doc: Optional[Union[str, Path]] = None,
     runtime: Optional[str] = None,
     ensure: bool = True,
@@ -306,7 +472,27 @@ def md2docx(
         abs_in = p.resolve()
         out_abs = abs_in.with_suffix(".docx")
         in_dir = abs_in.parent
-        container_in = f"/work/{abs_in.name}"
+
+        # Determine the actual title to use
+        actual_title = determine_document_title(abs_in, title)
+
+        # Handle multiple H1s by shifting headings and adding title
+        h1_count = count_h1_headers(abs_in)
+        temp_file = None
+        if h1_count > 1:
+            # Create temporary file with shifted headings
+            modified_content = shift_headings_and_add_title(abs_in, actual_title)
+            temp_file = tempfile.NamedTemporaryFile(
+                mode="w", suffix=".md", delete=False, dir=in_dir
+            )
+            temp_file.write(modified_content)
+            temp_file.close()
+
+            # Use the temporary file for conversion
+            container_in = f"/work/{Path(temp_file.name).name}"
+        else:
+            container_in = f"/work/{abs_in.name}"
+
         container_out = f"/work/{out_abs.name}"
 
         cmd = [runtime, "run", "--rm"]
@@ -345,12 +531,21 @@ def md2docx(
             "--lua-filter=/filters/mermaid.lua",
         ]
         inner += list(markdown_flags or [])
+
+        # Set document title
+        inner += ["--metadata=title:" + actual_title]
+
         inner += [container_in, "-o", container_out]
         if reference_doc:
             inner += ["--reference-doc=/ref/" + Path(reference_doc).resolve().name]
 
         cmd += inner
         subprocess.run(cmd, check=True)
+
+        # Clean up temporary file if created
+        if temp_file and os.path.exists(temp_file.name):
+            os.unlink(temp_file.name)
+
         results.append(out_abs)
 
     return results

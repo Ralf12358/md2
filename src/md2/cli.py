@@ -51,6 +51,7 @@ HTML generator options:
     --no-toc         Disable Table of Contents (default: enabled)
     --toc-depth=N    TOC depth (levels), default per Pandoc
       --html-title=TITLE Sets the title of the document
+      --title=TITLE    Sets the title of the document (overrides auto-detection and html-title)
       --html-css=URL   In full HTML or XHTML mode add a css link
       --css=PATH       CSS file to use for styling
 """
@@ -66,6 +67,7 @@ def main_md2html(argv: Optional[List[str]] = None) -> None:
     dialect = "pandoc"
     markdown_flags = ["--toc"]  # TOC enabled by default
     html_title = None
+    title = None
     html_css = None
     files = []
     i = 0
@@ -81,6 +83,9 @@ def main_md2html(argv: Optional[List[str]] = None) -> None:
             i += 2
         elif arg.startswith("--html-title="):
             html_title = arg[13:]  # len("--html-title=")
+            i += 1
+        elif arg.startswith("--title="):
+            title = arg[8:]  # len("--title=")
             i += 1
         elif arg.startswith("--html-css="):
             html_css = arg[11:]  # len("--html-css=")
@@ -138,6 +143,7 @@ def main_md2html(argv: Optional[List[str]] = None) -> None:
         dialect=dialect,
         markdown_flags=markdown_flags,
         html_title=html_title,
+        title=title,
         html_css=html_css,
     )
 
@@ -188,6 +194,7 @@ HTML generator options:
     --no-toc         Disable Table of Contents (default: enabled)
     --toc-depth=N    TOC depth (levels), default per Pandoc
       --html-title=TITLE Sets the title of the document
+      --title=TITLE    Sets the title of the document (overrides auto-detection and html-title)
       --html-css=URL   In full HTML or XHTML mode add a css link
       --css=PATH       CSS file to use for styling
 """
@@ -203,6 +210,7 @@ def main_md2pdf(argv: Optional[List[str]] = None) -> None:
     dialect = "pandoc"
     markdown_flags = ["--toc"]  # TOC enabled by default
     html_title = None
+    title = None
     html_css = None
     files = []
     i = 0
@@ -218,6 +226,9 @@ def main_md2pdf(argv: Optional[List[str]] = None) -> None:
             i += 2
         elif arg.startswith("--html-title="):
             html_title = arg[13:]  # len("--html-title=")
+            i += 1
+        elif arg.startswith("--title="):
+            title = arg[8:]  # len("--title=")
             i += 1
         elif arg.startswith("--html-css="):
             html_css = arg[11:]  # len("--html-css=")
@@ -275,6 +286,7 @@ def main_md2pdf(argv: Optional[List[str]] = None) -> None:
         dialect=dialect,
         markdown_flags=markdown_flags,
         html_title=html_title,
+        title=title,
         html_css=html_css,
     )
 
@@ -349,6 +361,7 @@ Markdown suppression options:
 DOCX options:
     --no-toc         Disable Table of Contents (default: enabled)
     --toc-depth=N    TOC depth (levels), default per Pandoc
+    --title=TITLE    Sets the title of the document (overrides auto-detection)
     --reference-doc=PATH  Use a Word reference template for styles
 """
     print(usage, file=sys.stderr)
@@ -361,6 +374,7 @@ def main_md2docx(argv: Optional[List[str]] = None) -> None:
 
     dialect = "pandoc"
     markdown_flags: List[str] = ["--toc"]
+    title: Optional[str] = None
     reference_doc: Optional[str] = None
     files: List[str] = []
     i = 0
@@ -374,6 +388,9 @@ def main_md2docx(argv: Optional[List[str]] = None) -> None:
             i += 1
         elif arg.startswith("--toc-depth="):
             markdown_flags.append(arg)
+            i += 1
+        elif arg.startswith("--title="):
+            title = arg[8:]  # len("--title=")
             i += 1
         elif arg.startswith("--reference-doc="):
             reference_doc = arg.split("=", 1)[1]
@@ -426,5 +443,6 @@ def main_md2docx(argv: Optional[List[str]] = None) -> None:
         [Path(f) for f in files],
         dialect=dialect,
         markdown_flags=markdown_flags,
+        title=title,
         reference_doc=reference_doc,
     )

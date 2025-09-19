@@ -54,6 +54,7 @@ md2html --css styles/custom.css file.md
 md2html --github notes.md
 md2html --ftables --fstrikethrough file.md
 md2html --html-title="My Document" --html-css="custom.css" file.md
+md2html --title="Custom Title" file.md  # Override automatic title detection
 md2html a.md b.md c.md
 ```
 
@@ -63,6 +64,7 @@ md2pdf doc.md
 md2pdf --css styles/custom.css doc.md
 md2pdf --github --ftables doc.md
 md2pdf --html-title="Report" doc.md
+md2pdf --title="Annual Report 2025" doc.md  # Override automatic title detection
 md2pdf --toc-depth=2 doc.md
 ```
 
@@ -70,6 +72,7 @@ md2pdf --toc-depth=2 doc.md
 ```sh
 md2docx doc.md
 md2docx --reference-doc styles/reference.docx doc.md
+md2docx --title="Professional Report" doc.md  # Override automatic title detection
 md2docx --github --no-toc doc.md
 md2docx --commonmark doc.md
 md2docx a.md b.md c.md
@@ -112,7 +115,8 @@ Both `md2html`, `md2pdf`, and `md2docx` support extensive Markdown processing op
 
 #### HTML generator options:
 - `--fverbatim-entities` - Do not translate entities
-- `--html-title=TITLE` - Sets the title of the document
+- `--html-title=TITLE` - Sets the HTML title of the document (overridden by --title)
+- `--title=TITLE` - Sets the document title (overrides automatic detection and --html-title)
 - `--html-css=URL` - In full HTML or XHTML mode add a css link
 - `--css=PATH` - CSS file to use for styling
 
@@ -122,6 +126,40 @@ Both `md2html`, `md2pdf`, and `md2docx` support extensive Markdown processing op
 
 #### DOCX-specific options (md2docx only):
 - `--reference-doc=PATH` - Use a Word reference template for styling
+
+#### Title Handling:
+The document title is determined automatically based on the source document structure:
+
+- **Single H1 header**: Uses the H1 text as the document title
+- **Multiple H1 headers**: Uses the filename (without extension) as the document title and restructures the document:
+  - All existing headings are shifted down one level (H1→H2, H2→H3, etc.)
+  - A new H1 title is added at the top with the determined title
+  - This ensures proper document hierarchy and complete table of contents
+- **--title override**: The `--title` option always overrides automatic detection and `--html-title`
+- **--html-title**: Only affects HTML title when `--title` is not specified
+
+Examples:
+```markdown
+# My Document Title
+## Section 1
+## Section 2
+```
+→ Title: "My Document Title" (from H1), structure unchanged
+
+```markdown
+# Chapter 1
+## Section A
+# Chapter 2
+## Section B
+```
+→ Title: "filename" (from filename), structure becomes:
+```markdown
+# filename
+## Chapter 1
+### Section A
+## Chapter 2
+### Section B
+```
 
 Behavior notes for TOC:
 - TOC is enabled by default. Use `--no-toc` to disable it.
@@ -170,6 +208,7 @@ md2html(
     dialect="github",
     markdown_flags=["--ftables", "--fstrikethrough", "--flatex-math"],
     html_title="My Document",
+    title="Override Title",  # Overrides automatic detection and html_title
     html_css="custom.css",
     self_contained=True  # Creates portable single-file HTML
 )
@@ -178,7 +217,7 @@ md2pdf(
     [Path("report.md")],
     css=Path("styles/report.css"),
     markdown_flags=["--fpermissive-autolinks", "--ftasklists"],
-    html_title="Monthly Report",
+    title="Annual Report 2025",  # Override automatic title detection
     self_contained=True  # Embeds all resources
 )
 
@@ -359,7 +398,8 @@ Size impact: Self-contained HTML files are typically 5-10x larger due to embedde
 - `css`: Optional Path to CSS file for styling (HTML/PDF only)
 - `dialect`: "pandoc" (default), "commonmark", or "github"
 - `markdown_flags`: List of markdown extension/suppression flags
-- `html_title`: Optional HTML document title (HTML/PDF only)
+- `html_title`: Optional HTML document title (HTML/PDF only, overridden by `title`)
+- `title`: Optional document title that overrides automatic detection and `html_title` (all formats)
 - `html_css`: Optional CSS URL for HTML mode (HTML/PDF only)
 - `reference_doc`: Optional Path to Word reference template for styling (DOCX only)
 - `self_contained`: Boolean (default False) - when True, embeds all external resources (images, CSS) into the output HTML as data URIs, creating a completely portable single-file document (HTML/PDF only)
@@ -398,6 +438,7 @@ Generate with advanced features:
 md2pdf --github --ftables --ftasklists examples/doc.md
 
 # Custom title and CSS
+md2html --title="Complete Documentation" --css styles/custom.css examples/doc.md
 md2html --html-title="Documentation" --css styles/custom.css examples/doc.md
 
 # LaTeX math support
