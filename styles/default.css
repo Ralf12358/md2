@@ -642,6 +642,7 @@ nav#TOC,
 
 /* Print: top-priority rule — never break at headings */
 @media print {
+
     h1,
     h2,
     h3,
