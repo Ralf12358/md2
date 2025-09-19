@@ -152,7 +152,13 @@ html_to_pdf([Path("already.html")])
 # With CSS and dialect
 md_to_html([Path("a.md"), Path("b.md")], css=Path("styles/custom.css"), dialect="github")
 md_to_pdf([Path("paper.md")], css=Path("styles/custom.css"))
+
+# DOCX with reference template (custom styling)
 md_to_docx([Path("paper.md")], reference_doc="styles/reference.docx", dialect="github")
+
+# DOCX with different reference templates
+md_to_docx([Path("report.md")], reference_doc="styles/corporate-template.docx")
+md_to_docx([Path("manual.md")], reference_doc="styles/technical-docs.docx")
 
 # Self-contained HTML (embeds all images and CSS)
 html_paths = md_to_html([Path("document.md")], self_contained=True)
@@ -217,21 +223,97 @@ DOCX_SVG=1 md2docx document.md
 ```
 
 ### Styling DOCX Output
+
+#### Creating a Reference Template
+
+##### Method 1: Generate Pandoc's Default Template
 ```bash
-# Generate reference template
+# Generate Pandoc's default reference template
 podman run --rm --userns=keep-id --network=host \
   -v "$PWD:/work" md2:latest \
   pandoc --print-default-data-file reference.docx > styles/reference.docx
 
-# Use reference template
+# Use the reference template
 md2docx --reference-doc=styles/reference.docx document.md
 ```
 
-After generating `reference.docx`, customize it in Word/LibreOffice to set:
-- Heading styles (Heading 1, Heading 2, etc.)
-- Body text font and spacing
-- Code block formatting
-- Table and list styles
+##### Method 2: Copy Styles from Existing DOCX
+```bash
+# Use any existing Word document as a style reference
+cp existing-document.docx styles/my-reference.docx
+md2docx --reference-doc=styles/my-reference.docx document.md
+```
+
+##### Method 3: Create from Scratch in Word/LibreOffice
+1. Create a new document in Microsoft Word or LibreOffice Writer
+2. Define all the styles you want (see customization section below)
+3. Save as `reference.docx`
+4. Use with `--reference-doc=path/to/reference.docx`
+
+#### Customizing the Reference Template
+
+Open `reference.docx` in Word/LibreOffice and customize these critical styles:
+
+**Essential Styles to Customize:**
+- **Normal**: Base paragraph style (font, size, spacing, color)
+- **Heading 1, 2, 3, 4, 5, 6**: Chapter/section headings (fonts, sizes, colors, numbering)
+- **Title**: Document title style
+- **Subtitle**: Document subtitle style
+- **First Paragraph**: Style for the first paragraph after headings
+- **Block Text**: Blockquotes and indented content
+- **Source Code**: Code blocks and inline code formatting
+
+**Advanced Styles:**
+- **Table Grid**: Table appearance, borders, cell padding
+- **Caption**: Figure and table captions
+- **List Paragraph**: Bulleted and numbered lists
+- **List Number**, **List Number 2**, etc.: Multi-level numbering
+- **List Bullet**, **List Bullet 2**, etc.: Multi-level bullets
+- **Hyperlink**: Link colors and formatting
+- **Footnote Text**: Footnote appearance
+
+**Mathematical Content:**
+- LaTeX math is automatically converted to Word's native equation format (OMML)
+- Math formatting inherits from the surrounding text style
+- For custom math appearance, modify the paragraph styles where math appears
+
+#### Style Inheritance and Best Practices
+
+1. **Start with Normal style**: All other styles typically inherit from "Normal"
+2. **Use style inheritance**: Define common properties in Normal, override specific properties in other styles
+3. **Test with sample content**: Create a test document with headers, code, tables, lists, and math
+4. **Font considerations**:
+   - Use fonts available on target systems
+   - Liberation and DejaVu fonts are included in the container
+   - Avoid proprietary fonts unless you know they're available
+5. **Page layout**: Set margins, page size, headers/footers in the reference document
+
+#### Example Workflow
+
+```bash
+# 1. Generate base template
+md2docx --reference-doc=styles/reference.docx sample.md
+
+# 2. Open styles/reference.docx in Word/LibreOffice
+# 3. Modify styles as needed
+# 4. Save the reference document
+# 5. Use your customized template
+md2docx --reference-doc=styles/reference.docx my-document.md
+```
+
+#### Using Corporate/Brand Templates
+
+To use your organization's document template:
+
+```bash
+# Copy your corporate template
+cp /path/to/corporate-template.docx styles/company-brand.docx
+
+# Use it for conversions
+md2docx --reference-doc=styles/company-brand.docx report.md
+```
+
+**Note**: The reference document's content is ignored; only the styles are applied to the converted Markdown content.
 
 ## Math Support
 
@@ -274,12 +356,13 @@ Size impact: Self-contained HTML files are typically 5-10x larger due to embedde
 ### API Parameters
 
 - `input_paths`: List of Path objects for input files
-- `css`: Optional Path to CSS file for styling
+- `css`: Optional Path to CSS file for styling (HTML/PDF only)
 - `dialect`: "pandoc" (default), "commonmark", or "github"
 - `markdown_flags`: List of markdown extension/suppression flags
-- `html_title`: Optional HTML document title
-- `html_css`: Optional CSS URL for HTML mode
-- `self_contained`: Boolean (default False) - when True, embeds all external resources (images, CSS) into the output HTML as data URIs, creating a completely portable single-file document
+- `html_title`: Optional HTML document title (HTML/PDF only)
+- `html_css`: Optional CSS URL for HTML mode (HTML/PDF only)
+- `reference_doc`: Optional Path to Word reference template for styling (DOCX only)
+- `self_contained`: Boolean (default False) - when True, embeds all external resources (images, CSS) into the output HTML as data URIs, creating a completely portable single-file document (HTML/PDF only)
 - `runtime`: Optional container runtime (defaults to auto-detected)
 - `ensure`: Whether to ensure Docker image exists (default True)
 
@@ -322,6 +405,9 @@ md2pdf --flatex-math math-document.md
 
 # DOCX with custom styling
 md2docx --reference-doc=styles/reference.docx examples/doc.md
+
+# DOCX with corporate template
+md2docx --reference-doc=styles/corporate-brand.docx examples/doc.md
 
 # Table of Contents (enabled by default)
 md2html --toc-depth=3 examples/doc.md
