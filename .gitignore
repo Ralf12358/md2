@@ -1,5 +1,6 @@
 examples/*.html
 examples/*.pdf
+examples/*.docx
 examples/*.css
 
 __pycache__/
