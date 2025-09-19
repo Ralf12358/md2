@@ -3,6 +3,8 @@ examples/*.pdf
 examples/*.docx
 examples/*.css
 
+.~lock.*
+
 .playwright-mcp
 __pycache__/
 *.pyc
