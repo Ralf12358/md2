@@ -108,6 +108,25 @@ local function tune_svg(svg, opts)
     new_open = new_open:gsub('>$', ' preserveAspectRatio="xMidYMid meet">')
   end
 
+  -- Ensure a CSS class for centering via stylesheet
+  if new_open:match('class%s*=') then
+    local class_val = new_open:match('class%s*=%s*"([^"]*)"') or new_open:match("class%s*=%s*'([^']*)'") or ''
+    local has_mermaid = false
+    for token in string.gmatch(class_val, "%S+") do
+      if token == "mermaid-svg" then
+        has_mermaid = true
+        break
+      end
+    end
+    if not has_mermaid then
+      new_open = new_open
+        :gsub('class%s*=%s*"([^"]*)"', function(c) return 'class="' .. c .. ' mermaid-svg"' end)
+        :gsub("class%s*=%s*'([^']*)'", function(c) return "class='" .. c .. " mermaid-svg'" end)
+    end
+  else
+    new_open = new_open:gsub('>$', ' class="mermaid-svg">')
+  end
+
   -- Upsert style attribute
   if new_open:match('style%s*=') then
     new_open = new_open

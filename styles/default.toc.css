@@ -146,6 +146,13 @@ svg {
     /* In print: limit to ~150% of page width or reasonable page height */
 }
 
+/* Always center Mermaid diagrams */
+svg.mermaid-svg {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 /* List items containing inline math: add breathing room between bullets */
 li:has(.katex:not(.katex-display)),
 li:has(.mjx-container:not([display="true"])),
