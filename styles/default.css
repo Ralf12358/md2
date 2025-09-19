@@ -76,7 +76,7 @@ h2 {
     counter-increment: h2;
     counter-reset: h3;
     /* add ~one extra line of space before h2 */
-    margin-top: calc(1.2em + 1em);
+    margin-top: 3em;
 }
 
 h3 {

@@ -75,8 +75,8 @@ h2 {
     font-size: 1.5rem;
     counter-increment: h2;
     counter-reset: h3;
-    /* add ~one extra line of space before h2 */
-    margin-top: calc(1.2em + 1em);
+    /* add extra space before h2 */
+    margin-top: 3em;
 }
 
 h3 {

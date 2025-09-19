@@ -16,10 +16,6 @@ The Atlas methodology is based on the **Coherent Reality Interface Theory (CRIT)
 - **Basic binaural beat familiarity** (theta/alpha range)
 - **Completed safety protocols** certificationas of Lucid Navigation: A Practical Guide to Reality Selection
 
-## Overview
-
-This handbook presents a complete framework for selecting alternate realities through a staged practice: lucid dreaming → astral travel → intentional reality selection. Focusing on interdimensional travel, multiverse ethics, and repeatable “navigation protocols.”
-
 ### Core Navigation Pipeline
 
 ```mermaid
