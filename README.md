@@ -141,31 +141,31 @@ Behavior notes:
 
 ```python
 from pathlib import Path
-from md_html_pdf import md_to_html, md_to_pdf, html_to_pdf, md_to_docx
+from md2 import md2html, md2pdf, html2pdf, md2docx
 
 # Basic usage
-html_paths = md_to_html([Path("notes.md")])
-pdf_paths = md_to_pdf([Path("notes.md")])
-docx_paths = md_to_docx([Path("notes.md")])
-html_to_pdf([Path("already.html")])
+html_paths = md2html([Path("notes.md")])
+pdf_paths = md2pdf([Path("notes.md")])
+docx_paths = md2docx([Path("notes.md")])
+html2pdf([Path("already.html")])
 
 # With CSS and dialect
-md_to_html([Path("a.md"), Path("b.md")], css=Path("styles/custom.css"), dialect="github")
-md_to_pdf([Path("paper.md")], css=Path("styles/custom.css"))
+md2html([Path("a.md"), Path("b.md")], css=Path("styles/custom.css"), dialect="github")
+md2pdf([Path("paper.md")], css=Path("styles/custom.css"))
 
 # DOCX with reference template (custom styling)
-md_to_docx([Path("paper.md")], reference_doc="styles/reference.docx", dialect="github")
+md2docx([Path("paper.md")], reference_doc="styles/reference.docx", dialect="github")
 
 # DOCX with different reference templates
-md_to_docx([Path("report.md")], reference_doc="styles/corporate-template.docx")
-md_to_docx([Path("manual.md")], reference_doc="styles/technical-docs.docx")
+md2docx([Path("report.md")], reference_doc="styles/corporate-template.docx")
+md2docx([Path("manual.md")], reference_doc="styles/technical-docs.docx")
 
 # Self-contained HTML (embeds all images and CSS)
-html_paths = md_to_html([Path("document.md")], self_contained=True)
-pdf_paths = md_to_pdf([Path("document.md")], self_contained=True)
+html_paths = md2html([Path("document.md")], self_contained=True)
+pdf_paths = md2pdf([Path("document.md")], self_contained=True)
 
 # With advanced options
-md_to_html(
+md2html(
     [Path("doc.md")],
     dialect="github",
     markdown_flags=["--ftables", "--fstrikethrough", "--flatex-math"],
@@ -174,7 +174,7 @@ md_to_html(
     self_contained=True  # Creates portable single-file HTML
 )
 
-md_to_pdf(
+md2pdf(
     [Path("report.md")],
     css=Path("styles/report.css"),
     markdown_flags=["--fpermissive-autolinks", "--ftasklists"],
@@ -183,9 +183,9 @@ md_to_pdf(
 )
 
 # Table of Contents via Python API
-md_to_html([Path("doc.md")], markdown_flags=["--toc-depth=2"])  # TOC enabled by default, auto-uses styles/default.toc.css when no css passed
-md_to_pdf([Path("doc.md")])  # TOC enabled by default and styled in PDF as well
-md_to_html([Path("doc.md")], markdown_flags=["--no-toc"])  # Disable TOC
+md2html([Path("doc.md")], markdown_flags=["--toc-depth=2"])  # TOC enabled by default, auto-uses styles/default.toc.css when no css passed
+md2pdf([Path("doc.md")])  # TOC enabled by default and styled in PDF as well
+md2html([Path("doc.md")], markdown_flags=["--no-toc"])  # Disable TOC
 ```
 
 Each function returns a list of output paths.
@@ -196,10 +196,10 @@ Convert Markdown to Microsoft Word documents with full support for diagrams and 
 
 ```python
 # Basic DOCX conversion
-docx_paths = md_to_docx([Path("document.md")])
+docx_paths = md2docx([Path("document.md")])
 
 # With custom styling using Word reference template
-md_to_docx(
+md2docx(
     [Path("report.md")],
     reference_doc="styles/reference.docx",
     dialect="github",
@@ -336,7 +336,7 @@ $$\sum_{n=1}^{\infty} \frac{1}{n^2} = \frac{\pi^2}{6}$$
 
 ## Self-Contained HTML Generation
 
-When `self_contained=True` is used with `md_to_html()` or `md_to_pdf()` (default behavior):
+When `self_contained=True` is used with `md2html()` or `md2pdf()` (default behavior):
 
 - **All external images** are downloaded and embedded as base64 data URIs
 - **CSS is inlined** into the HTML document
@@ -382,7 +382,7 @@ Clone and run tests:
 uv run pytest -q
 ```
 
-Edit code under `src/md_html_pdf/`. Add tests under `src/tests/md_html_pdf/`.
+Edit code under `src/md2/`. Add tests under `src/tests/md2/`.
 
 ## Examples
 See `examples/` for sample markdown and produced artifacts.

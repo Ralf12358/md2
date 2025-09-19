@@ -1,7 +1,8 @@
+from aimport import *
 import sys
 from pathlib import Path
 from typing import List, Optional
-from .conversion import md_to_html, md_to_pdf, html_to_pdf, md_to_docx
+from .conversion import md2html, md2pdf, html2pdf, md2docx
 
 
 def usage_md2html() -> None:
@@ -131,7 +132,7 @@ def main_md2html(argv: Optional[List[str]] = None) -> None:
     if not files:
         usage_md2html()
 
-    md_to_html(
+    md2html(
         [Path(f) for f in files],
         css=css_path,
         dialect=dialect,
@@ -268,7 +269,7 @@ def main_md2pdf(argv: Optional[List[str]] = None) -> None:
     if not files:
         usage_md2pdf()
 
-    md_to_pdf(
+    md2pdf(
         [Path(f) for f in files],
         css=css_path,
         dialect=dialect,
@@ -298,7 +299,7 @@ def main_html2pdf(argv: Optional[List[str]] = None) -> None:
     if not files:
         usage_html2pdf()
 
-    html_to_pdf([Path(f) for f in files])
+    html2pdf([Path(f) for f in files])
 
 
 if __name__ == "__main__":
@@ -421,7 +422,7 @@ def main_md2docx(argv: Optional[List[str]] = None) -> None:
     if not files:
         usage_md2docx()
 
-    md_to_docx(
+    md2docx(
         [Path(f) for f in files],
         dialect=dialect,
         markdown_flags=markdown_flags,

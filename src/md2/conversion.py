@@ -1,3 +1,4 @@
+from aimport import *
 import subprocess
 from pathlib import Path
 from typing import List, Optional, Union
@@ -5,7 +6,7 @@ from . import runtime as rt
 import os
 
 
-def md_to_html(
+def md2html(
     input_paths: List[Union[str, Path]],
     css: Optional[str] = None,
     dialect: str = "pandoc",
@@ -113,7 +114,7 @@ def md_to_html(
     return results
 
 
-def html_to_pdf(
+def html2pdf(
     input_paths: List[Union[str, Path]],
     runtime: Optional[str] = None,
     ensure: bool = True,
@@ -145,7 +146,7 @@ def html_to_pdf(
     return results
 
 
-def md_to_pdf(
+def md2pdf(
     input_paths: List[Union[str, Path]],
     css: Optional[str] = None,
     dialect: str = "pandoc",
@@ -271,7 +272,7 @@ def _styles_dir() -> Path:
     return rt.project_root() / "styles"
 
 
-def md_to_docx(
+def md2docx(
     input_paths: List[Union[str, Path]],
     dialect: str = "pandoc",
     markdown_flags: Optional[List[str]] = None,

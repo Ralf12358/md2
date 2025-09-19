@@ -1,5 +1,6 @@
-import md_html_pdf.runtime as rt
-import md_html_pdf.conversion as conv
+from aimport import *
+import md2.runtime as rt
+import md2.conversion as conv
 
 
 def test_get_container_runtime_docker_only(monkeypatch):

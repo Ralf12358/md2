@@ -9,10 +9,10 @@ authors = [{ name = "Ralf Schneider" }]
 dependencies = ["aimport>=0.13.1", "pytest-timeout>=2.2.0"]
 
 [project.scripts]
-md2html = "md_html_pdf.cli:main_md2html"
-md2pdf = "md_html_pdf.cli:main_md2pdf"
-html2pdf = "md_html_pdf.cli:main_html2pdf"
-md2docx = "md_html_pdf.cli:main_md2docx"
+md2html = "md2.cli:main_md2html"
+md2pdf = "md2.cli:main_md2pdf"
+html2pdf = "md2.cli:main_html2pdf"
+md2docx = "md2.cli:main_md2docx"
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]
@@ -20,4 +20,4 @@ build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
 addopts = "-q --timeout=10"
-testpaths = ["src/tests"]
+testpaths = ["src/tests/md2"]
