@@ -765,6 +765,7 @@ nav#TOC>ul>li>ul>li>ul>li::before,
         page-break-inside: avoid;
     }
 }
+
 /* Print: top-priority rule — never break at headings */
 @media print {
 
@@ -781,6 +782,7 @@ nav#TOC>ul>li>ul>li>ul>li::before,
 
 /* Print: allow TOC to split across pages (override global list rules) */
 @media print {
+
     nav#TOC ul,
     nav#TOC ol,
     nav#TOC li,
