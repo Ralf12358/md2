@@ -121,7 +121,7 @@ Upon waking after this process, consciousness emerges in the new world. The phys
 
 ## Mathematical Frameworks and Computational Models
 
-### 1) Enhanced Coherence Metric
+### Enhanced Coherence Metric
 We evaluate session stability using a multi-factor coherence score $C \in [0,1]$:
 $$
 C = \sigma\Big(\alpha M + \beta S + \gamma R + \delta T - \epsilon N - \zeta D\Big),\quad \sigma(x)=\frac{1}{1+e^{-x}}
@@ -136,7 +136,7 @@ Where:
 
 Coefficients: $\alpha=0.25, \beta=0.20, \gamma=0.15, \delta=0.15, \epsilon=0.15, \zeta=0.10$
 
-### 2) Intention Vector Composition and Normalization
+### Intention Vector Composition and Normalization
 The intention vector $\vec{v}=[p, t, h, e, f]$ includes five dimensions:
 - $p$: spatial coordinates (3D vector)
 - $t$: temporal offset (scalar, days)
@@ -149,7 +149,7 @@ $$\tilde{\vec{v}} = \frac{\vec{v} - \mu_{\text{baseline}}}{\|\vec{v} - \mu_{\tex
 
 where $\mu_{\text{baseline}}$ is the practitioner's established neutral vector and $\varepsilon=10^{-6}$.
 
-### 3) Branch Selection Probability with Confidence Intervals
+### Branch Selection Probability with Confidence Intervals
 Given candidate branches $B_i$ with alignment scores $A_i$, coherence $C$, and uncertainty $U_i$:
 $$P(B_i) = \frac{e^{\lambda C A_i - \gamma U_i}}{\sum_j e^{\lambda C A_j - \gamma U_j}}$$
 
@@ -158,13 +158,13 @@ where $\lambda$ controls decisiveness and $\gamma$ penalizes uncertain branches.
 Confidence interval for branch selection:
 $$CI_{95\%} = P(B_i) \pm 1.96\sqrt{\frac{P(B_i)(1-P(B_i))}{n_{\text{samples}}}}$$
 
-### 4) Temporal Displacement Stability Function
+### Temporal Displacement Stability Function
 For safe temporal navigation, displacement stability follows:
 $$S(t) = e^{-\frac{|t|^{1.5}}{\tau_{\text{max}}}} \cdot \cos\left(\frac{2\pi t}{T_{\text{cycle}}}\right)$$
 
 where $\tau_{\text{max}}$ is maximum safe displacement and $T_{\text{cycle}}$ represents temporal resonance cycles.
 
-### 5) Energy Conservation Model
+### Energy Conservation Model
 During reality transitions, energy balance must satisfy:
 $$E_{\text{total}} = E_{\text{kinetic}} + E_{\text{potential}} + E_{\text{consciousness}} + E_{\text{cord}} = \text{constant}$$
 
@@ -172,7 +172,7 @@ With consciousness energy quantified as:
 $$E_{\text{consciousness}} = \int_0^T C(t) \cdot I(t) \, dt$$
 where $I(t)$ is intention intensity over session duration $T$.
 
-### 6) Astral Cord Stability Function
+### Astral Cord Stability Function
 Cord stability $S_{\text{cord}}(t)$ during establishment phase follows:
 $$S_{\text{cord}}(t) = S_0 \cdot e^{\alpha t} \cdot \left(1 - e^{-\beta \sqrt{E_{\text{focus}}}}\right) \cdot \cos\left(\frac{2\pi t}{T_{\text{resonance}}}\right)$$
 
@@ -183,7 +183,7 @@ where:
 - $E_{\text{focus}}$ is practitioner's focused energy level
 - $T_{\text{resonance}}$ represents body-to-body resonance period
 
-### 7) Neural Integration Rate Model
+### Neural Integration Rate Model
 Memory integration during the 30-day post-transfer period:
 $$M(t) = M_{\text{max}} \cdot \left(1 - e^{-\lambda t}\right) \cdot \left(1 + \gamma \sin\left(\frac{2\pi t}{T_{\text{sleep}}}\right)\right)$$
 
@@ -195,7 +195,7 @@ where:
 
 ## Comprehensive Training Protocols
 
-### Stage 1: Foundation - Lucid Dreaming Mastery (Weeks 1-8)
+### Foundation - Lucid Dreaming Mastery (Weeks 1-8)
 
 #### Week 1-2: Reality Check Development
 - **Digital Clock Method**: Check digital displays 10+ times daily; note inconsistencies in dream state
@@ -221,7 +221,7 @@ where:
 - **Portal Creation**: Practice opening doors/windows that lead to intended destinations
 - **Time Dilation**: Extend dream duration through intention and environmental cues
 
-### Stage 2: Intermediate - Astral Projection Protocols (Weeks 9-16)
+### Intermediate - Astral Projection Protocols (Weeks 9-16)
 
 #### Physical Preparation Sequence
 1. **Body Position**: Lie supine, arms at sides, legs uncrossed, head slightly elevated
@@ -256,7 +256,7 @@ where:
 - **Reality Verification**: Confirm astral observations with physical world checks
 - **Energy Conservation**: Limit initial sessions to 10-15 minutes astral time
 
-### Stage 3: Advanced - Reality Selection Mastery (Weeks 17-24)
+### Advanced - Reality Selection Mastery (Weeks 17-24)
 
 #### Dimensional Frequency Calibration
 - **Personal Baseline Establishment**: Record home reality's signature frequency over 7 sessions
@@ -298,7 +298,7 @@ where:
 
 ## Comprehensive Data Tables and Reference Charts
 
-### Table 1: Trigger Efficacy by Chronotype and Biorhythm Cycles
+### Trigger Efficacy by Chronotype and Biorhythm Cycles
 | Chronotype | Optimal Window | Primary Trigger | Secondary Trigger | Expected Onset (min) | Success Rate (%) | Lunar Phase Modifier |
 |------------|----------------|-----------------|-------------------|----------------------|------------------|---------------------|
 | Lark       | 03:30–05:00   | Breath Synchrony | Hand Counting     | 8–12                | 78              | +15% (New Moon)     |
@@ -306,7 +306,7 @@ where:
 | Owl        | 05:30–07:00   | Clock Drift     | Mirror Check      | 12–20               | 65              | +12% (Waning)       |
 | Polyphasic | Variable      | Binaural Beats  | Mantra Repetition | 15–25               | 82              | +20% (Waxing)       |
 
-### Table 2: Coherence Lock Components and Effectiveness Metrics
+### Coherence Lock Components and Effectiveness Metrics
 | Component | Technique | Weight $w$ | Duration (s) | Difficulty | Effectiveness Score |
 |-----------|-----------|-------------|--------------|------------|-------------------|
 | Mantra    | 6-syllable Sanskrit loop | 0.35 | 30-45 | Beginner | 8.2/10 |
@@ -317,7 +317,7 @@ where:
 
 Overall coherence formula: $C_\text{lock} = \sum_k w_k q_k \cdot f_{\text{practice}}$ where $f_{\text{practice}}$ accounts for individual skill level.
 
-### Table 3: Extended Reality Vector Field Specifications
+### Extended Reality Vector Field Specifications
 | Field | Symbol | Range | Resolution | Units | Stability Factor | Notes |
 |-------|--------|-------|------------|-------|-----------------|-------|
 | Spatial (X) | $p_x$ | ±10,000 km | 1 m | Meters | 0.95 | Relative to home anchor |
@@ -329,7 +329,7 @@ Overall coherence formula: $C_\text{lock} = \sum_k w_k q_k \cdot f_{\text{practi
 | Frequency | $f$ | 0.1-40 Hz | 0.1 Hz | Hertz | 0.79 | Dimensional resonance frequency |
 | Consciousness Level | $c$ | [1,10] | 0.1 | Scale | 0.67 | Target awareness sophistication |
 
-### Table 4: Environmental Factors and Success Rate Correlations
+### Environmental Factors and Success Rate Correlations
 | Factor | Optimal Range | Impact on Success (%) | Cord Stability Impact | Measurement Method |
 |--------|---------------|----------------------|---------------------|-------------------|
 | Room Temperature | 68-72°F (20-22°C) | +15% | +12% | Digital thermometer |
@@ -342,7 +342,7 @@ Overall coherence formula: $C_\text{lock} = \sum_k w_k q_k \cdot f_{\text{practi
 | Sound Level | < 30 dB | +25% | +15% | Decibel meter |
 | Schumann Resonance | 7.83 Hz ±0.1 | +35% | +45% | Frequency analyzer |
 
-### Table 5: Practitioner Skill Progression Benchmarks
+### Practitioner Skill Progression Benchmarks
 | Level | Requirements | Success Rate | Avg. Session Time | Cord Skills | Navigation Range | Certification |
 |-------|-------------|--------------|-------------------|-------------|------------------|---------------|
 | Novice | 10 lucid dreams | 15-25% | 45-60 min | Cord visualization only | Local reality only | Basic Safety |
@@ -353,7 +353,7 @@ Overall coherence formula: $C_\text{lock} = \sum_k w_k q_k \cdot f_{\text{practi
 
 ## Mermaid Diagrams
 
-### Diagram 1: Coherence State Machine
+### Coherence State Machine
 ```mermaid
 stateDiagram-v2
     [*] --> Lucid
@@ -366,7 +366,7 @@ stateDiagram-v2
     Select --> [*]
 ```
 
-### Diagram 2: Intention Vector Routing
+### Intention Vector Routing
 ```mermaid
 flowchart LR
     I[Intention Vector] --> N[Normalize]
@@ -376,7 +376,7 @@ flowchart LR
     S --> T[Timeline Entry]
 ```
 
-### Diagram 3: Safety Envelope
+### Safety Envelope
 ```mermaid
 flowchart TB
     Z[Start Session] --> H[Health Check]
@@ -391,7 +391,7 @@ flowchart TB
 
 ### Comprehensive Pre-Session Protocol
 
-#### Phase 1: Physical Preparation (30 minutes)
+#### Physical Preparation (30 minutes)
 1. **Hydration Protocol**: 16-20 oz pure water, consumed 45 minutes before session
 2. **Nutritional Support**: Low-glycemic snack (nuts, seeds) 60-90 minutes prior
 3. **Environmental Setup**:
@@ -402,14 +402,14 @@ flowchart TB
 4. **Technology Isolation**: All electronic devices off or in airplane mode within 10-foot radius
 5. **Clothing**: Natural fiber, loose-fitting garments; remove jewelry and accessories
 
-#### Phase 2: Mental Preparation (20 minutes)
+#### Mental Preparation (20 minutes)
 1. **Intention Statement**: Write specific goals in one clear sentence
 2. **Meditation**: 10-minute mindfulness practice focusing on breath awareness
 3. **Visualization**: Mental rehearsal of entire session from start to successful return
 4. **Affirmation Protocol**: Repeat protection mantras 3 times with increasing intensity
 5. **Log Template Preparation**: Pre-fill session metadata (date, time, conditions, vector)
 
-#### Phase 3: Energetic Preparation (15 minutes)
+#### Energetic Preparation (15 minutes)
 1. **Chakra Alignment**: Sequential activation from root to crown (2 minutes each)
 2. **Auric Cleansing**: Visualization of white light purifying energy field
 3. **Protection Barrier**: Create multi-layered protective shell using preferred method
@@ -785,7 +785,7 @@ function executeReturnProtocol():
 
 ## Extended Appendices and Reference Materials
 
-### A1: Standardized Units and Physical Constants
+### Standardized Units and Physical Constants
 
 #### Navigation Units
 - **Distance**: `reality-meter` (rm) = 1.0 standard meter in home timeline
@@ -807,7 +807,7 @@ function executeReturnProtocol():
 - 1 cHz = 1 Hz ± 0.05 Hz measurement uncertainty
 - 1 au = baseline meditation state (8–12 Hz brainwave activity)
 
-### A2: Equipment and Technology Specifications
+### Equipment and Technology Specifications
 
 #### Required Monitoring Equipment
 - **EMF Detector**: Range 0.1–1000 mG, accuracy ±0.05 mG
@@ -823,7 +823,7 @@ function executeReturnProtocol():
 - **Heart Rate Variability Monitor**: Real-time HRV display
 - **EEG Headband**: 4+ channel, wireless connectivity
 
-### A3: Extended Reference Bibliography
+### Extended Reference Bibliography
 
 #### Foundational Texts
 - *The Coherence Field: Notes on Dream-State Control, Vol. III* - Dr. Marina Astralsky, 2024
@@ -844,7 +844,7 @@ function executeReturnProtocol():
 - *Equipment Calibration and Maintenance Guide* - Technical Support Department
 - *Mentor Certification Requirements and Testing* - Education Division Handbook
 
-### A4: Professional Organizations and Certification Bodies
+### Professional Organizations and Certification Bodies
 
 #### International Navigation Council (INC)
 - **Founded**: 2019
@@ -866,7 +866,7 @@ function executeReturnProtocol():
 - **Meeting Schedule**: Quarterly review sessions, annual safety summit
 - **Reporting**: Anonymous incident reporting system available 24/7
 
-### A5: Troubleshooting and FAQ
+### Troubleshooting and FAQ
 
 #### Common Issues and Solutions
 
