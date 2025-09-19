@@ -32,14 +32,10 @@ def get_user_args(runtime: str) -> List[str]:
 
 
 def _uid() -> int:
-    import os
-
     return os.getuid()
 
 
 def _gid() -> int:
-    import os
-
     return os.getgid()
 
 
