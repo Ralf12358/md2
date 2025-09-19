@@ -269,3 +269,87 @@ def md_to_pdf(
 
 def _styles_dir() -> Path:
     return rt.project_root() / "styles"
+
+
+def md_to_docx(
+    input_paths: List[Union[str, Path]],
+    dialect: str = "pandoc",
+    markdown_flags: Optional[List[str]] = None,
+    reference_doc: Optional[Union[str, Path]] = None,
+    runtime: Optional[str] = None,
+    ensure: bool = True,
+) -> List[Path]:
+    if markdown_flags is None:
+        markdown_flags = ["--toc"]
+
+    processed_flags: List[str] = []
+    toc_disabled = False
+    for flag in markdown_flags:
+        if flag == "--no-toc":
+            toc_disabled = True
+        else:
+            processed_flags.append(flag)
+    if not toc_disabled and "--toc" not in processed_flags:
+        processed_flags.insert(0, "--toc")
+    if toc_disabled:
+        processed_flags = [f for f in processed_flags if f != "--toc"]
+
+    markdown_flags = processed_flags
+    runtime = runtime or rt.get_container_runtime()
+    if ensure:
+        rt.ensure_image(runtime, rt.project_root())
+
+    results: List[Path] = []
+    for p in input_paths:
+        p = Path(p).resolve()
+        abs_in = p.resolve()
+        out_abs = abs_in.with_suffix(".docx")
+        in_dir = abs_in.parent
+        container_in = f"/work/{abs_in.name}"
+        container_out = f"/work/{out_abs.name}"
+
+        cmd = [runtime, "run", "--rm"]
+        cmd += rt.get_user_args(runtime)
+        mounts = [
+            "-v",
+            f"{in_dir}:/work",
+            "-v",
+            f"{_styles_dir()}:/styles:ro",
+            "-v",
+            f"{rt.project_root()}/docker/filters:/filters:ro",
+        ]
+        if reference_doc:
+            ref_abs = Path(reference_doc).resolve()
+            mounts += ["-v", f"{ref_abs.parent}:/ref:ro"]
+        cmd += mounts
+        if os.environ.get("DOCX_SVG") is not None:
+            cmd += ["-e", f"DOCX_SVG={os.environ['DOCX_SVG']}"]
+        cmd.append(rt.IMAGE_NAME)
+
+        if dialect == "github":
+            input_format = "gfm+tex_math_dollars+emoji+footnotes+task_lists+strikeout"
+        elif dialect == "commonmark":
+            input_format = "commonmark_x+tex_math_dollars+tex_math_single_backslash+smart+emoji+footnotes+definition_lists+fenced_code_attributes+link_attributes+task_lists+strikeout+pipe_tables+table_captions"
+        else:
+            input_format = "markdown+tex_math_dollars+tex_math_single_backslash+smart+emoji+footnotes+definition_lists+fenced_code_attributes+link_attributes+task_lists+strikeout+pipe_tables+table_captions+auto_identifiers+implicit_header_references"
+
+        inner = [
+            "pandoc",
+            "-f",
+            input_format,
+            "-t",
+            "docx",
+            "--standalone",
+            "--resource-path=/work:/styles:/tmp",
+            "--lua-filter=/filters/mermaid.lua",
+        ]
+        inner += list(markdown_flags or [])
+        inner += [container_in, "-o", container_out]
+        if reference_doc:
+            inner += ["--reference-doc=/ref/" + Path(reference_doc).resolve().name]
+
+        cmd += inner
+        subprocess.run(cmd, check=True)
+        results.append(out_abs)
+
+    return results

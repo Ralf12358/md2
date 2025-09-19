@@ -1,4 +1,5 @@
 import md_html_pdf.runtime as rt
+import md_html_pdf.conversion as conv
 
 
 def test_get_container_runtime_docker_only(monkeypatch):

@@ -178,7 +178,7 @@ where $I(t)$ is intention intensity over session duration $T$.
 
 ### 6) Astral Cord Stability Function
 Cord stability $S_{\text{cord}}(t)$ during establishment phase follows:
-$$S_{\text{cord}}(t) = S_0 \cdot e^{\alpha t} \cdot \left(1 - e^{-\beta \sqrt{E_{\text{focus}}}}}\right) \cdot \cos\left(\frac{2\pi t}{T_{\text{resonance}}}\right)$$
+$$S_{\text{cord}}(t) = S_0 \cdot e^{\alpha t} \cdot \left(1 - e^{-\beta \sqrt{E_{\text{focus}}}}\right) \cdot \cos\left(\frac{2\pi t}{T_{\text{resonance}}}\right)$$
 
 where:
 - $S_0$ is initial connection strength

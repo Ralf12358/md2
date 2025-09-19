@@ -18,11 +18,12 @@ local function url_encode(data)
   return table.concat(result)
 end
 
-local function mermaid_image(code)
+local function mermaid_image(code, ext)
+  ext = ext or '.svg'
   local hash = sha1(code)
   local base = '/tmp/mermaid-' .. hash
   local infile = base .. '.mmd'
-  local outfile = base .. '.svg'
+  local outfile = base .. ext
   local f = assert(io.open(infile, 'w'))
   f:write(code)
   f:close()
@@ -129,57 +130,93 @@ function CodeBlock(el)
   if not el.classes:includes('mermaid') then
     return nil
   end
-  local out, err = mermaid_image(el.text)
+  local fmt = (FORMAT or '')
+  local is_docx = fmt:match('docx') ~= nil
+  local force_svg = os.getenv('DOCX_SVG') == '1' or el.attributes['svg'] == '1'
+  local out, err = mermaid_image(el.text, (is_docx and not force_svg) and '.png' or '.svg')
   if not out then
     io.stderr:write('[mermaid] generation failed: ' .. err .. '\n')
     return nil
   end
-  local f = io.open(out, 'rb')
-  if not f then
-    io.stderr:write('[mermaid] cannot read output: ' .. out .. '\n')
-    return nil
-  end
-  local data = f:read('*all')
-  f:close()
-  os.remove(out)
-  -- Inspect code block attributes for optional sizing control
-  local desired_percent
-  local attr_width = el.attributes["width"] or el.attributes["data-width"]
-  if attr_width then
-    local p = attr_width:match('^(%d+)%%$')
-    if p then desired_percent = tonumber(p) end
-    if not desired_percent then
-      local num = tonumber(attr_width)
-      if num then
-        if num <= 2 then
-          desired_percent = math.floor(num * 100 + 0.5)
-        elseif num <= 100 then
-          desired_percent = math.floor(num + 0.5)
+
+  if is_docx then
+    -- For DOCX: return Image element, keep file for Pandoc to process
+    local desired_percent
+    local attr_width = el.attributes["width"] or el.attributes["data-width"]
+    if attr_width then
+      local p = attr_width:match('^(%d+)%%$')
+      if p then desired_percent = tonumber(p) end
+      if not desired_percent then
+        local num = tonumber(attr_width)
+        if num then
+          if num <= 2 then
+            desired_percent = math.floor(num * 100 + 0.5)
+          elseif num <= 100 then
+            desired_percent = math.floor(num + 0.5)
+          end
         end
       end
     end
-  end
-  local scale = el.attributes["scale"] or el.attributes["data-scale"]
-  local scale_num = tonumber(scale)
-  if scale_num and scale_num > 0 and not desired_percent then
-    -- Apply scale to heuristic defaults (handled in tune_svg via opts.width_percent)
-    -- We'll compute after we know heuristic; here we pass a hint to scale the result later.
-  end
+    local scale = el.attributes["scale"] or el.attributes["data-scale"]
+    local scale_num = tonumber(scale)
+    if scale_num and scale_num > 0 then
+      desired_percent = math.max(10, math.min(100, math.floor((desired_percent or 80) * scale_num + 0.5)))
+    end
+    local attr = pandoc.Attr("", {}, {})
+    if desired_percent then
+      attr.attributes["width"] = tostring(desired_percent) .. "%"
+    end
+    return pandoc.Para({ pandoc.Image({}, out, "", attr) })
+  else
+    -- For HTML: inline SVG with tuning, remove file
+    local f = io.open(out, 'rb')
+    if not f then
+      io.stderr:write('[mermaid] cannot read output: ' .. out .. '\n')
+      return nil
+    end
+    local data = f:read('*all')
+    f:close()
+    os.remove(out)
 
-  local tuned = tune_svg(data, { width_percent = desired_percent })
-  if scale_num and scale_num > 0 then
-    -- Adjust the inline style width by scaling factor
-  local current_style = tuned:match('<svg[^>]-style%s*=%s*"([^"]*)"') or tuned:match("<svg[^>]-style%s*=%s*'([^']*)'")
-    if current_style then
-      local w = current_style:match('width%s*:%s*(%d+)%%')
-      if w then
-        local newp = math.max(10, math.min(100, math.floor(tonumber(w) * scale_num + 0.5)))
-        local new_style = current_style:gsub('width%s*:%s*%d+%%', 'width:' .. newp .. '%%')
-        tuned = tuned:gsub('style%s*=%s*"[^"]*"', function() return 'style="' .. new_style .. '"' end)
-        tuned = tuned:gsub("style%s*=%s*'[^']*'", function() return "style='" .. new_style .. "'" end)
+    -- Inspect code block attributes for optional sizing control
+    local desired_percent
+    local attr_width = el.attributes["width"] or el.attributes["data-width"]
+    if attr_width then
+      local p = attr_width:match('^(%d+)%%$')
+      if p then desired_percent = tonumber(p) end
+      if not desired_percent then
+        local num = tonumber(attr_width)
+        if num then
+          if num <= 2 then
+            desired_percent = math.floor(num * 100 + 0.5)
+          elseif num <= 100 then
+            desired_percent = math.floor(num + 0.5)
+          end
+        end
       end
     end
+    local scale = el.attributes["scale"] or el.attributes["data-scale"]
+    local scale_num = tonumber(scale)
+    if scale_num and scale_num > 0 and not desired_percent then
+      -- Apply scale to heuristic defaults (handled in tune_svg via opts.width_percent)
+      -- We'll compute after we know heuristic; here we pass a hint to scale the result later.
+    end
+
+    local tuned = tune_svg(data, { width_percent = desired_percent })
+    if scale_num and scale_num > 0 then
+      -- Adjust the inline style width by scaling factor
+      local current_style = tuned:match('<svg[^>]-style%s*=%s*"([^"]*)"') or tuned:match("<svg[^>]-style%s*=%s*'([^']*)'")
+      if current_style then
+        local w = current_style:match('width%s*:%s*(%d+)%%')
+        if w then
+          local newp = math.max(10, math.min(100, math.floor(tonumber(w) * scale_num + 0.5)))
+          local new_style = current_style:gsub('width%s*:%s*%d+%%', 'width:' .. newp .. '%%')
+          tuned = tuned:gsub('style%s*=%s*"[^"]*"', function() return 'style="' .. new_style .. '"' end)
+          tuned = tuned:gsub("style%s*=%s*'[^']*'", function() return "style='" .. new_style .. "'" end)
+        end
+      end
+    end
+    -- Inline the SVG so sizing is self-contained and not CSS-dependent.
+    return pandoc.RawBlock('html', tuned)
   end
-  -- Inline the SVG so sizing is self-contained and not CSS-dependent.
-  return pandoc.RawBlock('html', tuned)
 end

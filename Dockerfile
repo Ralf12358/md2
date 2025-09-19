@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     python3-pip \
     fonts-dejavu-core fonts-dejavu-extra fonts-liberation \
+    librsvg2-bin \
     libc6 \
     libgtk-3-0 \
     libx11-6 \

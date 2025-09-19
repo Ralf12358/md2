@@ -81,3 +81,30 @@ def test_toc_can_be_disabled(monkeypatch, tmp_path):
     assert (
         "--no-toc" not in rec.cmds[0]
     )  # --no-toc is processed by our code, not passed to pandoc
+
+
+def test_md_to_docx_basic(monkeypatch, tmp_path):
+    f = tmp_path / "w.md"
+    f.write_text("# W")
+    rec = Recorder()
+    monkeypatch.setattr(conv.subprocess, "run", rec)
+    monkeypatch.setattr(rt, "ensure_image", lambda runtime, root: None)
+    monkeypatch.setattr(rt, "get_container_runtime", lambda: "docker")
+    out = conv.md_to_docx([f])
+    assert out[0].name == "w.docx"
+    assert rec.cmds[0][0] == "docker"
+    assert "pandoc" in rec.cmds[0]
+
+
+def test_md_to_docx_reference_doc(monkeypatch, tmp_path):
+    f = tmp_path / "x.md"
+    f.write_text("# X")
+    ref = tmp_path / "ref.docx"
+    ref.write_text("dummy")
+    rec = Recorder()
+    monkeypatch.setattr(conv.subprocess, "run", rec)
+    monkeypatch.setattr(rt, "ensure_image", lambda runtime, root: None)
+    monkeypatch.setattr(rt, "get_container_runtime", lambda: "docker")
+    conv.md_to_docx([f], reference_doc=str(ref))
+    cmd = rec.cmds[0]
+    assert any("--reference-doc=" in a for a in cmd)

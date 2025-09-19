@@ -66,6 +66,15 @@ md2pdf --html-title="Report" doc.md
 md2pdf --toc-depth=2 doc.md
 ```
 
+### md2docx (Markdown → DOCX)
+```sh
+md2docx doc.md
+md2docx --reference-doc styles/reference.docx doc.md
+md2docx --github --no-toc doc.md
+md2docx --commonmark doc.md
+md2docx a.md b.md c.md
+```
+
 ### html2pdf
 ```sh
 html2pdf doc.html other.html
@@ -73,7 +82,7 @@ html2pdf doc.html other.html
 
 ### Available Options
 
-Both `md2html` and `md2pdf` support extensive Markdown processing options:
+Both `md2html`, `md2pdf`, and `md2docx` support extensive Markdown processing options:
 
 #### Markdown dialect options:
 - Default: Pandoc Markdown with useful extensions (math via TeX, smart punctuation, emoji, footnotes, definition lists, fenced code/link attributes, task lists, strikeout, pipe tables, table captions, auto identifiers, implicit header refs).
@@ -111,6 +120,9 @@ Both `md2html` and `md2pdf` support extensive Markdown processing options:
 - `--no-toc` - Disable Table of Contents (default: enabled)
 - `--toc-depth=N` - Maximum heading depth included in TOC (e.g. 2 or 3)
 
+#### DOCX-specific options (md2docx only):
+- `--reference-doc=PATH` - Use a Word reference template for styling
+
 Behavior notes for TOC:
 - TOC is enabled by default. Use `--no-toc` to disable it.
 - When TOC is enabled and you did not pass `--css`, the tool automatically styles the TOC using `styles/default.toc.css`.
@@ -129,16 +141,18 @@ Behavior notes:
 
 ```python
 from pathlib import Path
-from md_html_pdf import md_to_html, md_to_pdf, html_to_pdf
+from md_html_pdf import md_to_html, md_to_pdf, html_to_pdf, md_to_docx
 
 # Basic usage
 html_paths = md_to_html([Path("notes.md")])
 pdf_paths = md_to_pdf([Path("notes.md")])
+docx_paths = md_to_docx([Path("notes.md")])
 html_to_pdf([Path("already.html")])
 
 # With CSS and dialect
 md_to_html([Path("a.md"), Path("b.md")], css=Path("styles/custom.css"), dialect="github")
 md_to_pdf([Path("paper.md")], css=Path("styles/custom.css"))
+md_to_docx([Path("paper.md")], reference_doc="styles/reference.docx", dialect="github")
 
 # Self-contained HTML (embeds all images and CSS)
 html_paths = md_to_html([Path("document.md")], self_contained=True)
@@ -169,6 +183,55 @@ md_to_html([Path("doc.md")], markdown_flags=["--no-toc"])  # Disable TOC
 ```
 
 Each function returns a list of output paths.
+
+## DOCX (Word Document) Support
+
+Convert Markdown to Microsoft Word documents with full support for diagrams and math:
+
+```python
+# Basic DOCX conversion
+docx_paths = md_to_docx([Path("document.md")])
+
+# With custom styling using Word reference template
+md_to_docx(
+    [Path("report.md")],
+    reference_doc="styles/reference.docx",
+    dialect="github",
+    markdown_flags=["--no-toc"]
+)
+```
+
+### DOCX Features
+- **Mermaid diagrams**: Rendered as PNG (default) for LibreOffice compatibility, or SVG for modern Word
+- **LaTeX math**: Converted to native Word equations (OMML format)
+- **Custom styling**: Use Word reference templates to control fonts, headings, and formatting
+- **Table of Contents**: Enabled by default, customizable depth
+
+### Mermaid in DOCX
+```bash
+# Default: PNG for maximum compatibility
+md2docx document.md
+
+# SVG for modern Word (better quality)
+DOCX_SVG=1 md2docx document.md
+```
+
+### Styling DOCX Output
+```bash
+# Generate reference template
+podman run --rm --userns=keep-id --network=host \
+  -v "$PWD:/work" md2:latest \
+  pandoc --print-default-data-file reference.docx > styles/reference.docx
+
+# Use reference template
+md2docx --reference-doc=styles/reference.docx document.md
+```
+
+After generating `reference.docx`, customize it in Word/LibreOffice to set:
+- Heading styles (Heading 1, Heading 2, etc.)
+- Body text font and spacing
+- Code block formatting
+- Table and list styles
 
 ## Math Support
 
@@ -257,9 +320,13 @@ md2html --html-title="Documentation" --css styles/custom.css examples/doc.md
 # LaTeX math support
 md2pdf --flatex-math math-document.md
 
+# DOCX with custom styling
+md2docx --reference-doc=styles/reference.docx examples/doc.md
+
 # Table of Contents (enabled by default)
 md2html --toc-depth=3 examples/doc.md
 md2pdf examples/doc.md
+md2docx --no-toc examples/doc.md
 ```
 
 ## Troubleshooting
