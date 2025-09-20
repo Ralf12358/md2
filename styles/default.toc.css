@@ -302,6 +302,11 @@ table {
     font-size: 0.94em;
 }
 
+/* Add spacing when one table directly follows another */
+table+table {
+    margin-top: 1.2em;
+}
+
 th,
 td {
     border: 1px solid var(--color-border);
@@ -479,6 +484,12 @@ hr {
 
     tfoot {
         display: table-footer-group;
+    }
+
+    /* Ensure adjacent tables have a visible gap in print */
+    table+table {
+        margin-top: calc(var(--print-block-spacing) * 1.5);
+
     }
 }
 
