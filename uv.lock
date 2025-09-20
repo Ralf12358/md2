@@ -43,7 +43,7 @@ wheels = [
 
 [[package]]
 name = "md2"
-version = "0.6.3"
+version = "0.6.4"
 source = { editable = "." }
 dependencies = [
     { name = "aimport" },
@@ -52,8 +52,8 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aimport", specifier = ">=0.13.1" },
-    { name = "pytest-timeout", specifier = ">=2.2.0" },
+    { name = "aimport", specifier = "==2.1.0" },
+    { name = "pytest-timeout", specifier = "==2.4.0" },
 ]
 
 [[package]]

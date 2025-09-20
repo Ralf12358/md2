@@ -4,7 +4,7 @@
     "description": "Render HTML to PDF using Puppeteer",
     "main": "print.js",
     "dependencies": {
-        "puppeteer": "24.10.2",
+        "puppeteer": "24.22.0",
         "minimist": "1.2.8"
     }
 }

@@ -1,10 +1,10 @@
-const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
 const argv = require('minimist')(process.argv.slice(2));
 
 (async () => {
     try {
+        const puppeteer = (await import('puppeteer')).default || (await import('puppeteer'));
         const input = argv._[0] || '/work/input.html';
         const output = argv._[1] || '/work/output.pdf';
         const waitFor = argv.waitFor || 'networkidle0';

@@ -1,4 +1,4 @@
-FROM node:22-bookworm-slim
+FROM node:22.11.0-bookworm-slim
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=false \
@@ -45,11 +45,12 @@ RUN ARCH=$(dpkg --print-architecture) \
     && dpkg -i /tmp/pandoc.deb \
     && rm -f /tmp/pandoc.deb
 
-RUN npm install -g @mermaid-js/mermaid-cli@11.9.0
+RUN npm install -g @mermaid-js/mermaid-cli@11.10.1
 
 ENV PUPPETEER_ARGS="--no-sandbox --disable-setuid-sandbox --disable-dev-shm-usage --disable-gpu"
 
-RUN pip3 install --break-system-packages pandoc-mermaid-filter==0.1.0 pandocfilters==1.5.0
+# Pin python filter tools
+RUN pip3 install --break-system-packages pandoc-mermaid-filter==0.1.0 pandocfilters==1.5.1
 
 # Provide MathJax locally to avoid network inside container
 RUN mkdir -p /mathjax && \

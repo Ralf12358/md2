@@ -3,7 +3,7 @@ set -eu
 OUT=""
 ARGS="$@"
 if command -v node >/dev/null 2>&1; then
-  PEXEC="$(cd /app && node -e 'try{process.stdout.write(require("puppeteer").executablePath())}catch(e){process.exit(0)}' 2>/dev/null || true)"
+  PEXEC="$(cd /app && node -e "(async()=>{try{const p=await import('puppeteer');const e=(p.default||p).executablePath?.()||(p.default||p).executablePath; if(e) process.stdout.write(typeof e==='function'?e():e)}catch(e){process.exit(0)}})()" 2>/dev/null || true)"
   if [ -n "${PEXEC:-}" ] && [ -x "$PEXEC" ]; then export PUPPETEER_EXECUTABLE_PATH="$PEXEC"; fi
 fi
 while [ "$#" -gt 0 ]; do
