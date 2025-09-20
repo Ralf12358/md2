@@ -197,6 +197,9 @@ HTML generator options:
       --title=TITLE    Sets the title of the document (overrides auto-detection and html-title)
       --html-css=URL   In full HTML or XHTML mode add a css link
       --css=PATH       CSS file to use for styling
+
+PDF options:
+    --no-page-numbers Disable page numbers in PDF output (default: enabled)
 """
     print(usage, file=sys.stderr)
     sys.exit(1)
@@ -212,6 +215,7 @@ def main_md2pdf(argv: Optional[List[str]] = None) -> None:
     html_title = None
     title = None
     html_css = None
+    page_numbers = True
     files = []
     i = 0
 
@@ -238,6 +242,9 @@ def main_md2pdf(argv: Optional[List[str]] = None) -> None:
             markdown_flags = [f for f in markdown_flags if f != "--toc"]
             if "--no-toc" not in markdown_flags:
                 markdown_flags.append("--no-toc")
+            i += 1
+        elif arg == "--no-page-numbers":
+            page_numbers = False
             i += 1
         elif arg.startswith("--toc-depth="):
             markdown_flags.append(arg)
@@ -288,11 +295,15 @@ def main_md2pdf(argv: Optional[List[str]] = None) -> None:
         html_title=html_title,
         title=title,
         html_css=html_css,
+        page_numbers=page_numbers,
     )
 
 
 def usage_html2pdf() -> None:
-    print("Usage: html2pdf file1.html [file2.html ...]", file=sys.stderr)
+    print(
+        "Usage: html2pdf [options] file1.html [file2.html ...]\n\nPDF options:\n    --no-page-numbers Disable page numbers in PDF output (default: enabled)",
+        file=sys.stderr,
+    )
     sys.exit(1)
 
 
@@ -300,9 +311,12 @@ def main_html2pdf(argv: Optional[List[str]] = None) -> None:
     if argv is None:
         argv = sys.argv[1:]
 
+    page_numbers = True
     files = []
     for arg in argv:
-        if arg.startswith("-"):
+        if arg == "--no-page-numbers":
+            page_numbers = False
+        elif arg.startswith("-"):
             print(f"Unknown option: {arg}", file=sys.stderr)
             usage_html2pdf()
         else:
@@ -311,7 +325,7 @@ def main_html2pdf(argv: Optional[List[str]] = None) -> None:
     if not files:
         usage_html2pdf()
 
-    html2pdf([Path(f) for f in files])
+    html2pdf([Path(f) for f in files], page_numbers=page_numbers)
 
 
 if __name__ == "__main__":

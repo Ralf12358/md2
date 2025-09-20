@@ -11,6 +11,7 @@ const argv = require('minimist')(process.argv.slice(2));
         const paperFormat = argv.format || 'A4';
         const margin = argv.margin || '10mm';
         const scale = Number(argv.scale || 1.0);
+        const pageNumbers = argv.pageNumbers !== 'false';
 
         const browser = await puppeteer.launch({
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
@@ -48,12 +49,29 @@ const argv = require('minimist')(process.argv.slice(2));
             });
         });
 
+        // Add CSS to hide page numbers on title and TOC pages if page numbers are enabled
+        if (pageNumbers) {
+            await page.addStyleTag({
+                content: `
+                    @media print {
+                        /* Hide page footer on first page (title page) and TOC page */
+                        @page :first {
+                            @bottom-center { content: none; }
+                        }
+                    }
+                `
+            });
+        }
+
         await page.pdf({
             path: output,
             format: paperFormat,
             margin: { top: margin, bottom: margin, left: margin, right: margin },
             printBackground: true,
-            scale
+            scale,
+            displayHeaderFooter: pageNumbers,
+            headerTemplate: pageNumbers ? '<div style="font-size: 9px; margin: 0 auto; width: 100%; text-align: center; color: #666;"></div>' : '',
+            footerTemplate: pageNumbers ? '<div style="font-size: 9px; margin: 0 auto; width: 100%; text-align: center; color: #666;"><span class="pageNumber"></span></div>' : ''
         });
 
         await browser.close();
