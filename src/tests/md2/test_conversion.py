@@ -37,7 +37,7 @@ def test_md2pdf_basic(monkeypatch, tmp_path):
     monkeypatch.setattr(conv.subprocess, "run", rec)
     monkeypatch.setattr(rt, "ensure_image", lambda runtime, root: None)
     monkeypatch.setattr(rt, "get_container_runtime", lambda: "docker")
-    
+
     conv.md2pdf([f])
     assert len(rec.cmds) == 2  # md2html then html2pdf
     assert rec.cmds[0][0] == "docker"  # First call (md2html)
@@ -53,7 +53,7 @@ def test_md2pdf_podman(monkeypatch, tmp_path):
     monkeypatch.setattr(conv.subprocess, "run", rec)
     monkeypatch.setattr(rt, "ensure_image", lambda runtime, root: None)
     monkeypatch.setattr(rt, "get_container_runtime", lambda: "podman")
-    
+
     conv.md2pdf([f])
     assert rec.cmds[0][0] == "podman"  # First call should be podman
     assert rec.cmds[1][0] == "podman"  # Second call should be podman
@@ -122,21 +122,24 @@ def test_temp_files_use_unique_names(monkeypatch, tmp_path):
     monkeypatch.setattr(conv.subprocess, "run", rec)
     monkeypatch.setattr(rt, "ensure_image", lambda runtime, root: None)
     monkeypatch.setattr(rt, "get_container_runtime", lambda: "docker")
-    
+
     # Mock uuid to return predictable values
     import uuid
-    monkeypatch.setattr(uuid, "uuid4", lambda: type('obj', (object,), {"hex": "abcd1234" * 4})())
-    
+
+    monkeypatch.setattr(
+        uuid, "uuid4", lambda: type("obj", (object,), {"hex": "abcd1234" * 4})()
+    )
+
     conv.md2html([f])
-    
+
     # Check that container path uses the new temp file pattern
     cmd = rec.cmds[0]
     container_script_args = None
     for i, arg in enumerate(cmd):
         if arg == "bash" and i + 1 < len(cmd) and cmd[i + 1].endswith("md2html.sh"):
-            container_script_args = cmd[i + 2:]
+            container_script_args = cmd[i + 2 :]
             break
-    
+
     assert container_script_args is not None
     assert container_script_args[0] == "/work/tmp_abcd1234.md"
 
@@ -149,14 +152,14 @@ def test_html2pdf_with_page_numbers(monkeypatch, tmp_path):
     monkeypatch.setattr(conv.subprocess, "run", rec)
     monkeypatch.setattr(rt, "ensure_image", lambda runtime, root: None)
     monkeypatch.setattr(rt, "get_container_runtime", lambda: "docker")
-    
+
     result = conv.html2pdf([f], page_numbers=True)
-    
+
     # Check that pdf_generator.sh was used
     cmd = rec.cmds[0]
     assert "pdf_generator.sh" in str(cmd)
     assert "true" in cmd  # page_numbers=true
-    
+
     # Final result should be the expected PDF name
     assert result[0].name == "test.pdf"
 
@@ -169,13 +172,13 @@ def test_html2pdf_no_page_numbers(monkeypatch, tmp_path):
     monkeypatch.setattr(conv.subprocess, "run", rec)
     monkeypatch.setattr(rt, "ensure_image", lambda runtime, root: None)
     monkeypatch.setattr(rt, "get_container_runtime", lambda: "docker")
-    
+
     result = conv.html2pdf([f], page_numbers=False)
-    
+
     # Check that pdf_generator.sh was used with page_numbers=false
     cmd = rec.cmds[0]
     assert "pdf_generator.sh" in str(cmd)
     assert "false" in cmd  # page_numbers=false
-    
+
     # Final result should be the expected PDF name
     assert result[0].name == "test.pdf"

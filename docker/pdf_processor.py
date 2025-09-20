@@ -51,16 +51,16 @@ def find_toc_placeholders(pdf_path: Path) -> List[Tuple[int, fitz.Rect, str]]:
             for w in words:
                 token = w[4] or ""
                 if re.fullmatch(r"P#\d{2,4}", token):
-                    placeholders.append(
-                        (pno, fitz.Rect(w[0], w[1], w[2], w[3]), token)
-                    )
+                    placeholders.append((pno, fitz.Rect(w[0], w[1], w[2], w[3]), token))
         doc.close()
     except Exception:
         pass
     return placeholders
 
 
-def replace_text_in_pdf(pdf_path: Path, replacements: Dict[str, str], output_path: Path) -> None:
+def replace_text_in_pdf(
+    pdf_path: Path, replacements: Dict[str, str], output_path: Path
+) -> None:
     """Replace placeholder text in PDF with actual page numbers"""
     doc = fitz.open(pdf_path)
     for page_index in range(len(doc)):
@@ -127,16 +127,17 @@ def replace_text_in_pdf(pdf_path: Path, replacements: Dict[str, str], output_pat
 def apply_toc_page_numbers(pdf_path: Path, output_path: Path) -> None:
     """Apply TOC page numbers to PDF"""
     placeholder_infos = find_toc_placeholders(pdf_path)
-    
+
     if not placeholder_infos:
         # No placeholders found, just copy the file
         if pdf_path != output_path:
             import shutil
+
             shutil.copy2(pdf_path, output_path)
         return
 
     doc = fitz.open(pdf_path)
-    
+
     by_page: Dict[int, List[Tuple[fitz.Rect, str]]] = defaultdict(list)
     for pno, rect, token in placeholder_infos:
         by_page[pno].append((rect, token))
@@ -201,25 +202,29 @@ def apply_toc_page_numbers(pdf_path: Path, output_path: Path) -> None:
 def main():
     """Main entry point for PDF processing"""
     if len(sys.argv) != 4:
-        print("Usage: pdf_processor.py <input_pdf> <output_pdf> <enable_page_numbers>", file=sys.stderr)
+        print(
+            "Usage: pdf_processor.py <input_pdf> <output_pdf> <enable_page_numbers>",
+            file=sys.stderr,
+        )
         sys.exit(1)
-    
+
     input_pdf = Path(sys.argv[1])
     output_pdf = Path(sys.argv[2])
     enable_page_numbers = sys.argv[3].lower() == "true"
-    
+
     if not input_pdf.exists():
         print(f"Error: Input PDF {input_pdf} does not exist", file=sys.stderr)
         sys.exit(1)
-    
+
     if enable_page_numbers:
         apply_toc_page_numbers(input_pdf, output_pdf)
     else:
         # Just copy the file if page numbers are disabled
         if input_pdf != output_pdf:
             import shutil
+
             shutil.copy2(input_pdf, output_pdf)
-    
+
     print(f"PDF processed: {input_pdf} -> {output_pdf}")
 
 

@@ -153,6 +153,7 @@ def md2html(
             # Create temporary file with shifted headings in container
             modified_content = shift_headings_and_add_title(abs_in, actual_title)
             import uuid
+
             temp_name = f"tmp_{uuid.uuid4().hex[:8]}.md"
             temp_file = in_dir / temp_name
             temp_file.write_text(modified_content, encoding="utf-8")
@@ -262,7 +263,7 @@ def html2pdf(
         p = Path(p).resolve()
         in_dir = p.parent
         out_pdf = p.with_suffix(".pdf")
-            
+
         # Use unified container script for HTML->PDF conversion and processing
         cmd = (
             [runtime, "run", "--rm"]
@@ -282,6 +283,8 @@ def html2pdf(
 
         results.append(out_pdf)
     return results
+
+
 def md2pdf(
     input_paths: List[Union[str, Path]],
     css: Optional[str] = None,
@@ -297,7 +300,7 @@ def md2pdf(
 ) -> List[Path]:
     # Generate HTML with TOC placeholders if page numbers are enabled
     from .html_postprocess import add_toc_page_number_placeholders
-    
+
     html_paths = md2html(
         input_paths=input_paths,
         css=css,
@@ -379,6 +382,7 @@ def md2docx(
             # Create temporary file with shifted headings in container
             modified_content = shift_headings_and_add_title(abs_in, actual_title)
             import uuid
+
             temp_name = f"tmp_{uuid.uuid4().hex[:8]}.md"
             temp_file = in_dir / temp_name
             temp_file.write_text(modified_content, encoding="utf-8")
