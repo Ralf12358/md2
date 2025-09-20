@@ -178,6 +178,7 @@ def md2html(
 
         cmd = [runtime, "run", "--rm"]
         cmd += rt.get_user_args(runtime)
+        cmd += rt.get_security_args(runtime)
         cmd += [
             "-v",
             f"{in_dir}:/work",
@@ -368,7 +369,7 @@ def _styles_dir() -> Path:
     dev_path = rt.project_root() / "styles"
     if dev_path.exists():
         return dev_path
-    
+
     # For installed package
     return Path(__file__).parent / "styles"
 

@@ -33,6 +33,20 @@ def get_user_args(runtime: str) -> List[str]:
     return ["--user", f"{_uid()}:{_gid()}"]
 
 
+def get_security_args(runtime: str) -> List[str]:
+    # Security flags for Puppeteer/Chrome in containers
+    # Needed for Mermaid diagram generation
+    args = [
+        "--cap-add=SYS_ADMIN",  # Required for Chrome sandboxing
+        "--security-opt=seccomp=unconfined",  # Disable seccomp restrictions
+    ]
+
+    # Add /dev/shm size for Chrome
+    args += ["--shm-size=1g"]
+
+    return args
+
+
 def _uid() -> int:
     return os.getuid()
 
@@ -64,12 +78,12 @@ def project_root() -> Path:
     # For development: use relative path from source
     # For installed package: use package data directory
     current_file = Path(__file__).resolve()
-    
+
     # Try development structure first: src/md2/runtime.py -> project_root
     dev_root = current_file.parent.parent.parent
     if (dev_root / "docker" / "md2html.sh").exists():
         return dev_root
-    
+
     # For installed package: assets are packaged alongside the module
     package_root = current_file.parent
     return package_root
@@ -80,7 +94,7 @@ def get_docker_script_path() -> Path:
     dev_path = project_root() / "docker" / "md2html.sh"
     if dev_path.exists():
         return dev_path
-    
+
     # For installed package, use importlib.resources
     try:
         with importlib.resources.path("md2", "md2html.sh") as path:
@@ -95,7 +109,7 @@ def get_docker_filters_path() -> Path:
     dev_path = project_root() / "docker" / "filters"
     if dev_path.exists():
         return dev_path
-    
+
     # For installed package
     try:
         with importlib.resources.path("md2", "filters") as path:
