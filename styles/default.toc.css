@@ -404,6 +404,7 @@ hr {
     h2 {
         margin-top: calc(0.9em + 1em);
     }
+
     /* Slightly less extra spacing before h3 (~20% less than h2) */
     h3 {
         margin-top: calc(0.9em + 0.8em);
