@@ -151,16 +151,15 @@ def md2html(
         h1_count = count_h1_headers(abs_in)
         temp_file = None
         if h1_count > 1:
-            # Create temporary file with shifted headings
+            # Create temporary file with shifted headings in container
             modified_content = shift_headings_and_add_title(abs_in, actual_title)
-            temp_file = tempfile.NamedTemporaryFile(
-                mode="w", suffix=".md", delete=False, dir=in_dir
-            )
-            temp_file.write(modified_content)
-            temp_file.close()
+            import uuid
+            temp_name = f"tmp_{uuid.uuid4().hex[:8]}.md"
+            temp_file = in_dir / temp_name
+            temp_file.write_text(modified_content, encoding="utf-8")
 
             # Use the temporary file for conversion
-            container_in = f"/work/{Path(temp_file.name).name}"
+            container_in = f"/work/{temp_name}"
         else:
             container_in = f"/work/{abs_in.name}"
 
@@ -239,8 +238,8 @@ def md2html(
         subprocess.run(cmd, check=True)
 
         # Clean up temporary file if created
-        if temp_file and os.path.exists(temp_file.name):
-            os.unlink(temp_file.name)
+        if temp_file and temp_file.exists():
+            temp_file.unlink()
 
         # Add TOC placeholders if needed
         add_toc_page_number_placeholders(out_abs, add_toc_placeholders)
@@ -266,6 +265,17 @@ def html2pdf(
         p = Path(p).resolve()
         in_dir = p.parent
         out_pdf = p.with_suffix(".pdf")
+        
+        # When page numbers enabled, create temp PDF first, then process to final
+        if page_numbers:
+            import uuid
+            temp_pdf_name = f"tmp_{uuid.uuid4().hex[:8]}.pdf"
+            container_temp_pdf = f"/work/{temp_pdf_name}"
+            temp_pdf_path = in_dir / temp_pdf_name
+        else:
+            container_temp_pdf = f"/work/{out_pdf.name}"
+            temp_pdf_path = out_pdf
+            
         cmd = (
             [runtime, "run", "--rm"]
             + rt.get_user_args(runtime)
@@ -276,14 +286,25 @@ def html2pdf(
                 "node",
                 "/app/print.js",
                 f"/work/{p.name}",
-                f"/work/{out_pdf.name}",
+                container_temp_pdf,
                 f"--pageNumbers={str(page_numbers).lower()}",
             ]
         )
         subprocess.run(cmd, check=True)
 
         # Post-process TOC if page numbers enabled
-        out_pdf = postprocess_pdf_toc(out_pdf, page_numbers)
+        if page_numbers:
+            final_pdf = postprocess_pdf_toc(temp_pdf_path, page_numbers)
+            # Move processed PDF to final location if different
+            if final_pdf != out_pdf and final_pdf.exists():
+                if out_pdf.exists():
+                    out_pdf.unlink()
+                final_pdf.rename(out_pdf)
+            # Clean up temp file if it exists and is different from final
+            if temp_pdf_path.exists() and temp_pdf_path != out_pdf:
+                temp_pdf_path.unlink()
+        else:
+            out_pdf = postprocess_pdf_toc(out_pdf, page_numbers)
 
         results.append(out_pdf)
     return results
@@ -417,16 +438,15 @@ def md2docx(
         h1_count = count_h1_headers(abs_in)
         temp_file = None
         if h1_count > 1:
-            # Create temporary file with shifted headings
+            # Create temporary file with shifted headings in container
             modified_content = shift_headings_and_add_title(abs_in, actual_title)
-            temp_file = tempfile.NamedTemporaryFile(
-                mode="w", suffix=".md", delete=False, dir=in_dir
-            )
-            temp_file.write(modified_content)
-            temp_file.close()
+            import uuid
+            temp_name = f"tmp_{uuid.uuid4().hex[:8]}.md"
+            temp_file = in_dir / temp_name
+            temp_file.write_text(modified_content, encoding="utf-8")
 
             # Use the temporary file for conversion
-            container_in = f"/work/{Path(temp_file.name).name}"
+            container_in = f"/work/{temp_name}"
         else:
             container_in = f"/work/{abs_in.name}"
 
@@ -480,8 +500,8 @@ def md2docx(
         subprocess.run(cmd, check=True)
 
         # Clean up temporary file if created
-        if temp_file and os.path.exists(temp_file.name):
-            os.unlink(temp_file.name)
+        if temp_file and temp_file.exists():
+            temp_file.unlink()
 
         results.append(out_abs)
 
