@@ -38,10 +38,9 @@ def test_md2pdf_basic(monkeypatch, tmp_path):
     monkeypatch.setattr(rt, "ensure_image", lambda runtime, root: None)
     monkeypatch.setattr(rt, "get_container_runtime", lambda: "docker")
     conv.md2pdf([f])
-    assert len(rec.cmds) == 1
-    assert rec.cmds[0][0] == "docker"
-    assert "sh" in rec.cmds[0]
-    assert "-c" in rec.cmds[0]
+    assert len(rec.cmds) == 2  # Now calls md2html then html2pdf
+    assert rec.cmds[0][0] == "docker"  # First call (md2html)
+    assert rec.cmds[1][0] == "docker"  # Second call (html2pdf)
 
 
 def test_md2pdf_podman(monkeypatch, tmp_path):
@@ -52,9 +51,8 @@ def test_md2pdf_podman(monkeypatch, tmp_path):
     monkeypatch.setattr(rt, "ensure_image", lambda runtime, root: None)
     monkeypatch.setattr(rt, "get_container_runtime", lambda: "podman")
     conv.md2pdf([f])
-    assert rec.cmds[0][0] == "podman"
-    assert "sh" in rec.cmds[0]
-    assert "-c" in rec.cmds[0]
+    assert rec.cmds[0][0] == "podman"  # First call should be podman
+    assert rec.cmds[1][0] == "podman"  # Second call should be podman
 
 
 def test_toc_enabled_by_default(monkeypatch, tmp_path):

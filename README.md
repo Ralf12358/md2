@@ -66,6 +66,7 @@ md2pdf --github --ftables doc.md
 md2pdf --html-title="Report" doc.md
 md2pdf --title="Annual Report 2025" doc.md  # Override automatic title detection
 md2pdf --toc-depth=2 doc.md
+md2pdf --no-page-numbers doc.md  # Disable page numbers (enabled by default)
 ```
 
 ### md2docx (Markdown → DOCX)
@@ -81,6 +82,7 @@ md2docx a.md b.md c.md
 ### html2pdf
 ```sh
 html2pdf doc.html other.html
+html2pdf --no-page-numbers doc.html  # Disable page numbers (enabled by default)
 ```
 
 ### Available Options
@@ -190,6 +192,11 @@ html2pdf([Path("already.html")])
 # With CSS and dialect
 md2html([Path("a.md"), Path("b.md")], css=Path("styles/custom.css"), dialect="github")
 md2pdf([Path("paper.md")], css=Path("styles/custom.css"))
+
+# PDF with/without page numbers
+md2pdf([Path("document.md")])  # Page numbers enabled by default
+md2pdf([Path("document.md")], page_numbers=False)  # Disable page numbers
+html2pdf([Path("document.html")], page_numbers=True)  # Enable page numbers
 
 # DOCX with reference template (custom styling)
 md2docx([Path("paper.md")], reference_doc="styles/reference.docx", dialect="github")

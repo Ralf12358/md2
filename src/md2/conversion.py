@@ -108,7 +108,10 @@ def md2html(
     runtime: Optional[str] = None,
     ensure: bool = True,
     self_contained: bool = True,  # Default True: embeds MathJax + resources for offline use
+    add_toc_placeholders: bool = False,
 ) -> List[Path]:
+    from .html_postprocess import add_toc_page_number_placeholders
+    
     if markdown_flags is None:
         markdown_flags = ["--toc"]  # TOC enabled by default
 
@@ -231,14 +234,17 @@ def md2html(
         if html_css:
             inner.extend([f"--html-css={html_css}"])
 
-    cmd += inner
-    subprocess.run(cmd, check=True)
+        cmd += inner
+        subprocess.run(cmd, check=True)
 
-    # Clean up temporary file if created
-    if temp_file and os.path.exists(temp_file.name):
-        os.unlink(temp_file.name)
+        # Clean up temporary file if created
+        if temp_file and os.path.exists(temp_file.name):
+            os.unlink(temp_file.name)
 
-    results.append(out_abs)
+        # Add TOC placeholders if needed
+        add_toc_page_number_placeholders(out_abs, add_toc_placeholders)
+
+        results.append(out_abs)
     return results
 
 
@@ -246,7 +252,10 @@ def html2pdf(
     input_paths: List[Union[str, Path]],
     runtime: Optional[str] = None,
     ensure: bool = True,
+    page_numbers: bool = True,
 ) -> List[Path]:
+    from .toc_postprocess import postprocess_pdf_toc
+    
     runtime = runtime or rt.get_container_runtime()
     if ensure:
         rt.ensure_image(runtime, rt.project_root())
@@ -267,9 +276,14 @@ def html2pdf(
                 "/app/print.js",
                 f"/work/{p.name}",
                 f"/work/{out_pdf.name}",
+                f"--pageNumbers={str(page_numbers).lower()}",
             ]
         )
         subprocess.run(cmd, check=True)
+        
+        # Post-process TOC if page numbers enabled
+        out_pdf = postprocess_pdf_toc(out_pdf, page_numbers)
+        
         results.append(out_pdf)
     return results
 
@@ -285,152 +299,34 @@ def md2pdf(
     runtime: Optional[str] = None,
     ensure: bool = True,
     self_contained: bool = True,  # Default True: embeds MathJax + resources for offline use
+    page_numbers: bool = True,
 ) -> List[Path]:
-    if markdown_flags is None:
-        markdown_flags = ["--toc"]  # TOC enabled by default
-
-    # Process flags to remove --no-toc and ensure --toc is default
-    processed_flags = []
-    toc_disabled = False
-    for flag in markdown_flags:
-        if flag == "--no-toc":
-            toc_disabled = True
-        else:
-            processed_flags.append(flag)
-
-    # Add --toc if not disabled and not already present
-    if not toc_disabled and "--toc" not in processed_flags:
-        processed_flags.insert(0, "--toc")
-
-    # If --no-toc was specified, remove any --toc flags
-    if toc_disabled:
-        processed_flags = [f for f in processed_flags if f != "--toc"]
-
-    markdown_flags = processed_flags
-    runtime = runtime or rt.get_container_runtime()
-    if ensure:
-        rt.ensure_image(runtime, rt.project_root())
-
-    results = []
-    for p in input_paths:
-        p = Path(p).resolve()
-        abs_in = p.resolve()
-        out_abs = abs_in.with_suffix(".pdf")
-        in_dir = abs_in.parent
-
-        # Determine the actual title to use
-        actual_title = determine_document_title(abs_in, title)
-
-        # Handle multiple H1s by shifting headings and adding title
-        h1_count = count_h1_headers(abs_in)
-        temp_file = None
-        if h1_count > 1:
-            # Create temporary file with shifted headings
-            modified_content = shift_headings_and_add_title(abs_in, actual_title)
-            temp_file = tempfile.NamedTemporaryFile(
-                mode="w", suffix=".md", delete=False, dir=in_dir
-            )
-            temp_file.write(modified_content)
-            temp_file.close()
-
-            # Use the temporary file for conversion
-            container_in = f"/work/{Path(temp_file.name).name}"
-        else:
-            container_in = f"/work/{abs_in.name}"
-
-        container_html = f"/tmp/{abs_in.stem}.html"
-        container_out = f"/work/{out_abs.name}"
-
-        css_mount = []
-        css_arg = None
-        toc_enabled = bool(markdown_flags and any(f == "--toc" for f in markdown_flags))
-        if css:
-            css_abs = Path(css).resolve()
-            css_mount = ["-v", f"{css_abs.parent}:/custom-styles:ro"]
-            css_arg = f"/custom-styles/{css_abs.name}"
-        elif toc_enabled:
-            css_arg = "/styles/default.toc.css"
-
-        cmd = [runtime, "run", "--rm"]
-        cmd += rt.get_user_args(runtime)
-        cmd += [
-            "-v",
-            f"{in_dir}:/work",
-            "-v",
-            f"{_styles_dir()}:/styles:ro",
-            "-v",
-            f"{rt.project_root()}/docker/filters:/filters:ro",
-            "-v",
-            f"{rt.project_root()}/docker/md2html.sh:/usr/local/bin/md2html.sh:ro",
-        ]
-        cmd += css_mount
-        if self_contained:
-            cmd += ["-e", "INTERNAL_RESOURCES=1", "-e", "LINK_CSS=0"]
-        else:
-            link_css = os.environ.get("LINK_CSS")
-            internal = os.environ.get("INTERNAL_RESOURCES")
-            if link_css is not None:
-                cmd += ["-e", f"LINK_CSS={link_css}"]
-            if internal is not None:
-                cmd += ["-e", f"INTERNAL_RESOURCES={internal}"]
-        cmd.append(rt.IMAGE_NAME)
-
-        # Build the command to run both conversions in sequence
-        md2html_cmd = [
-            "bash",
-            "/usr/local/bin/md2html.sh",
-            container_in,
-            container_html,
-        ]
-        if css_arg:
-            md2html_cmd.append(css_arg)
-
-        # Add dialect options
-        if dialect == "github":
-            md2html_cmd.extend(["--github"])
-        elif dialect == "commonmark":
-            md2html_cmd.extend(["--commonmark"])
-        elif dialect == "pandoc":
-            pass
-
-        # Add markdown flags
-        if markdown_flags:
-            md2html_cmd.extend(markdown_flags)
-
-        # Add HTML options - priority: title > html_title > auto-detected title
-        if title:
-            # --title overrides everything for HTML title
-            md2html_cmd.extend([f"--html-title={actual_title}"])
-        elif html_title:
-            # --html-title only overrides auto-detection if --title not specified
-            md2html_cmd.extend([f"--html-title={html_title}"])
-        else:
-            # Use auto-detected title
-            md2html_cmd.extend([f"--html-title={actual_title}"])
-
-        # Pass the determined title for other purposes (like PDF titles)
-        md2html_cmd.extend([f"--doc-title={actual_title}"])
-
-        if html_css:
-            md2html_cmd.extend([f"--html-css={html_css}"])
-
-        # Chain commands: md->html, then html->pdf
-        inner_cmd = " && ".join(
-            [
-                " ".join(md2html_cmd),
-                f"node /app/print.js {container_html} {container_out}",
-            ]
-        )
-
-    cmd += ["sh", "-c", inner_cmd]
-    subprocess.run(cmd, check=True)
-
-    # Clean up temporary file if created
-    if temp_file and os.path.exists(temp_file.name):
-        os.unlink(temp_file.name)
-
-    results.append(out_abs)
-    return results
+    from .toc_postprocess import postprocess_pdf_toc
+    
+    # First step: generate HTML with TOC placeholders
+    html_paths = md2html(
+        input_paths=input_paths,
+        css=css,
+        dialect=dialect,
+        markdown_flags=markdown_flags,
+        html_title=html_title,
+        title=title,
+        html_css=html_css,
+        runtime=runtime,
+        ensure=ensure,
+        self_contained=self_contained,
+        add_toc_placeholders=page_numbers,  # Add placeholders when page numbers enabled
+    )
+    
+    # Second step: convert HTML to PDF
+    pdf_paths = html2pdf(
+        html_paths,
+        runtime=runtime,
+        ensure=False,  # Already ensured in md2html
+        page_numbers=page_numbers,
+    )
+    
+    return pdf_paths
 
 
 def _styles_dir() -> Path:
