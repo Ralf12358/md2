@@ -303,7 +303,7 @@ def md2pdf(
 ) -> List[Path]:
     from .toc_postprocess import postprocess_pdf_toc
 
-    # First step: generate HTML with TOC placeholders
+    # First step: generate HTML (no placeholders are added here)
     html_paths = md2html(
         input_paths=input_paths,
         css=css,
@@ -315,16 +315,50 @@ def md2pdf(
         runtime=runtime,
         ensure=ensure,
         self_contained=self_contained,
-        add_toc_placeholders=page_numbers,  # Add placeholders when page numbers enabled
+        add_toc_placeholders=False,  # Never alter HTML output with placeholders
     )
 
-    # Second step: convert HTML to PDF
-    pdf_paths = html2pdf(
-        html_paths,
-        runtime=runtime,
-        ensure=False,  # Already ensured in md2html
-        page_numbers=page_numbers,
-    )
+    # If page numbers enabled, temporarily inject placeholders on-disk before printing, then restore
+    from .html_postprocess import add_toc_page_number_placeholders
+
+    modified_html: List[Path] = []
+    backups: List[Path] = []
+    try:
+        if page_numbers:
+            for p in html_paths:
+                backup = p.with_suffix(p.suffix + ".bak")
+                if backup.exists():
+                    backup.unlink()
+                # copy contents to backup
+                with (
+                    open(p, "r", encoding="utf-8") as rf,
+                    open(backup, "w", encoding="utf-8") as wf,
+                ):
+                    wf.write(rf.read())
+                backups.append(backup)
+                # modify original in place for printing
+                add_toc_page_number_placeholders(p, True)
+                modified_html.append(p)
+
+        # Convert HTML to PDF
+        pdf_paths = html2pdf(
+            html_paths,
+            runtime=runtime,
+            ensure=False,
+            page_numbers=page_numbers,
+        )
+    finally:
+        # Restore original HTML so HTML outputs never contain page numbers
+        for p in html_paths:
+            bak = p.with_suffix(p.suffix + ".bak")
+            if bak.exists():
+                # restore original contents
+                with (
+                    open(bak, "r", encoding="utf-8") as rf,
+                    open(p, "w", encoding="utf-8") as wf,
+                ):
+                    wf.write(rf.read())
+                bak.unlink()
 
     return pdf_paths
 

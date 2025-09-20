@@ -69,6 +69,13 @@ md2pdf --toc-depth=2 doc.md
 md2pdf --no-page-numbers doc.md  # Disable page numbers (enabled by default)
 ```
 
+#### TOC Page Numbers (PDF only)
+- Page numbers in the Table of Contents are applied during the PDF post-processing step only.
+- HTML output never displays page numbers in the TOC or on pages.
+- The tool temporarily inserts invisible placeholder tags during printing, then restores the original HTML.
+- TOC entries remain clickable links; we avoid redactions to preserve link annotations.
+- Disable via `--no-page-numbers`.
+
 ### md2docx (Markdown → DOCX)
 ```sh
 md2docx doc.md
@@ -197,6 +204,8 @@ md2pdf([Path("paper.md")], css=Path("styles/custom.css"))
 md2pdf([Path("document.md")])  # Page numbers enabled by default
 md2pdf([Path("document.md")], page_numbers=False)  # Disable page numbers
 html2pdf([Path("document.html")], page_numbers=True)  # Enable page numbers
+
+# Note: TOC page numbers are only rendered in PDF, never in HTML.
 
 # DOCX with reference template (custom styling)
 md2docx([Path("paper.md")], reference_doc="styles/reference.docx", dialect="github")

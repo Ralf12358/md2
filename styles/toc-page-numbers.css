@@ -6,7 +6,7 @@ body.toc-page-numbers #TOC a::after,
 body.toc-page-numbers .toc a::after {
     content: " ............ " attr(data-toc-placeholder);
     float: right;
-    color: var(--color-muted);
+    color: #fafbfc;
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.1em;
 }
@@ -30,5 +30,6 @@ body.toc-page-numbers .toc a {
     body.toc-page-numbers .toc a::after {
         content: " ........ " attr(data-toc-placeholder);
         letter-spacing: 0.08em;
+        color: #fafbfc;
     }
 }

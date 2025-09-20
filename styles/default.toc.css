@@ -675,7 +675,7 @@ body.toc-page-numbers nav#TOC a::after,
 body.toc-page-numbers #TOC a::after,
 body.toc-page-numbers .toc a::after {
     content: attr(data-toc-placeholder);
-    color: var(--color-muted);
+    color: #fafbfc !important;
     font-variant-numeric: tabular-nums;
     float: right;
 }
