@@ -18,6 +18,12 @@ md2docx = "md2.cli:main_md2docx"
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+md2 = ["md2html.sh", "filters/*", "styles/*"]
+
 [tool.pytest.ini_options]
 addopts = "-q --timeout=10"
 testpaths = ["src/tests/md2"]

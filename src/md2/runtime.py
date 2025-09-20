@@ -2,6 +2,7 @@ from aimport import *
 import subprocess
 import shutil
 import os
+import importlib.resources
 from pathlib import Path
 from typing import List
 
@@ -60,4 +61,45 @@ def ensure_image(runtime: str, context_dir: Path) -> None:
 
 
 def project_root() -> Path:
-    return Path(__file__).resolve().parent.parent.parent
+    # For development: use relative path from source
+    # For installed package: use package data directory
+    current_file = Path(__file__).resolve()
+    
+    # Try development structure first: src/md2/runtime.py -> project_root
+    dev_root = current_file.parent.parent.parent
+    if (dev_root / "docker" / "md2html.sh").exists():
+        return dev_root
+    
+    # For installed package: assets are packaged alongside the module
+    package_root = current_file.parent
+    return package_root
+
+
+def get_docker_script_path() -> Path:
+    # For development environment
+    dev_path = project_root() / "docker" / "md2html.sh"
+    if dev_path.exists():
+        return dev_path
+    
+    # For installed package, use importlib.resources
+    try:
+        with importlib.resources.path("md2", "md2html.sh") as path:
+            return path
+    except (ImportError, FileNotFoundError):
+        # Fallback to package directory
+        return Path(__file__).parent / "md2html.sh"
+
+
+def get_docker_filters_path() -> Path:
+    # For development environment
+    dev_path = project_root() / "docker" / "filters"
+    if dev_path.exists():
+        return dev_path
+    
+    # For installed package
+    try:
+        with importlib.resources.path("md2", "filters") as path:
+            return path
+    except (ImportError, FileNotFoundError):
+        # Fallback to package directory
+        return Path(__file__).parent / "filters"

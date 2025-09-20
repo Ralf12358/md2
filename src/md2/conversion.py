@@ -184,9 +184,9 @@ def md2html(
             "-v",
             f"{_styles_dir()}:/styles:ro",
             "-v",
-            f"{rt.project_root()}/docker/filters:/filters:ro",
+            f"{rt.get_docker_filters_path()}:/filters:ro",
             "-v",
-            f"{rt.project_root()}/docker/md2html.sh:/usr/local/bin/md2html.sh:ro",
+            f"{rt.get_docker_script_path()}:/usr/local/bin/md2html.sh:ro",
         ]
         cmd += css_mount
         if self_contained:
@@ -364,7 +364,13 @@ def md2pdf(
 
 
 def _styles_dir() -> Path:
-    return rt.project_root() / "styles"
+    # For development environment
+    dev_path = rt.project_root() / "styles"
+    if dev_path.exists():
+        return dev_path
+    
+    # For installed package
+    return Path(__file__).parent / "styles"
 
 
 def md2docx(
