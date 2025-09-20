@@ -1,7 +1,6 @@
 from aimport import *
 import subprocess
 import re
-import tempfile
 from pathlib import Path
 from typing import List, Optional, Union
 from . import runtime as rt
@@ -254,8 +253,6 @@ def html2pdf(
     ensure: bool = True,
     page_numbers: bool = True,
 ) -> List[Path]:
-    from .toc_postprocess import postprocess_pdf_toc
-
     runtime = runtime or rt.get_container_runtime()
     if ensure:
         rt.ensure_image(runtime, rt.project_root())
@@ -265,17 +262,8 @@ def html2pdf(
         p = Path(p).resolve()
         in_dir = p.parent
         out_pdf = p.with_suffix(".pdf")
-        
-        # When page numbers enabled, create temp PDF first, then process to final
-        if page_numbers:
-            import uuid
-            temp_pdf_name = f"tmp_{uuid.uuid4().hex[:8]}.pdf"
-            container_temp_pdf = f"/work/{temp_pdf_name}"
-            temp_pdf_path = in_dir / temp_pdf_name
-        else:
-            container_temp_pdf = f"/work/{out_pdf.name}"
-            temp_pdf_path = out_pdf
             
+        # Use unified container script for HTML->PDF conversion and processing
         cmd = (
             [runtime, "run", "--rm"]
             + rt.get_user_args(runtime)
@@ -283,33 +271,17 @@ def html2pdf(
                 "-v",
                 f"{in_dir}:/work",
                 rt.IMAGE_NAME,
-                "node",
-                "/app/print.js",
+                "bash",
+                "/usr/local/bin/pdf_generator.sh",
                 f"/work/{p.name}",
-                container_temp_pdf,
-                f"--pageNumbers={str(page_numbers).lower()}",
+                f"/work/{out_pdf.name}",
+                str(page_numbers).lower(),
             ]
         )
         subprocess.run(cmd, check=True)
 
-        # Post-process TOC if page numbers enabled
-        if page_numbers:
-            final_pdf = postprocess_pdf_toc(temp_pdf_path, page_numbers)
-            # Move processed PDF to final location if different
-            if final_pdf != out_pdf and final_pdf.exists():
-                if out_pdf.exists():
-                    out_pdf.unlink()
-                final_pdf.rename(out_pdf)
-            # Clean up temp file if it exists and is different from final
-            if temp_pdf_path.exists() and temp_pdf_path != out_pdf:
-                temp_pdf_path.unlink()
-        else:
-            out_pdf = postprocess_pdf_toc(out_pdf, page_numbers)
-
         results.append(out_pdf)
     return results
-
-
 def md2pdf(
     input_paths: List[Union[str, Path]],
     css: Optional[str] = None,
@@ -323,9 +295,9 @@ def md2pdf(
     self_contained: bool = True,  # Default True: embeds MathJax + resources for offline use
     page_numbers: bool = True,
 ) -> List[Path]:
-    from .toc_postprocess import postprocess_pdf_toc
-
-    # First step: generate HTML (no placeholders are added here)
+    # Generate HTML with TOC placeholders if page numbers are enabled
+    from .html_postprocess import add_toc_page_number_placeholders
+    
     html_paths = md2html(
         input_paths=input_paths,
         css=css,
@@ -337,50 +309,16 @@ def md2pdf(
         runtime=runtime,
         ensure=ensure,
         self_contained=self_contained,
-        add_toc_placeholders=False,  # Never alter HTML output with placeholders
+        add_toc_placeholders=page_numbers,  # Add placeholders if page numbers enabled
     )
 
-    # If page numbers enabled, temporarily inject placeholders on-disk before printing, then restore
-    from .html_postprocess import add_toc_page_number_placeholders
-
-    modified_html: List[Path] = []
-    backups: List[Path] = []
-    try:
-        if page_numbers:
-            for p in html_paths:
-                backup = p.with_suffix(p.suffix + ".bak")
-                if backup.exists():
-                    backup.unlink()
-                # copy contents to backup
-                with (
-                    open(p, "r", encoding="utf-8") as rf,
-                    open(backup, "w", encoding="utf-8") as wf,
-                ):
-                    wf.write(rf.read())
-                backups.append(backup)
-                # modify original in place for printing
-                add_toc_page_number_placeholders(p, True)
-                modified_html.append(p)
-
-        # Convert HTML to PDF
-        pdf_paths = html2pdf(
-            html_paths,
-            runtime=runtime,
-            ensure=False,
-            page_numbers=page_numbers,
-        )
-    finally:
-        # Restore original HTML so HTML outputs never contain page numbers
-        for p in html_paths:
-            bak = p.with_suffix(p.suffix + ".bak")
-            if bak.exists():
-                # restore original contents
-                with (
-                    open(bak, "r", encoding="utf-8") as rf,
-                    open(p, "w", encoding="utf-8") as wf,
-                ):
-                    wf.write(rf.read())
-                bak.unlink()
+    # Convert HTML to PDF (container handles all PDF processing)
+    pdf_paths = html2pdf(
+        html_paths,
+        runtime=runtime,
+        ensure=False,
+        page_numbers=page_numbers,
+    )
 
     return pdf_paths
 

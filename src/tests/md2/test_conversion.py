@@ -38,19 +38,12 @@ def test_md2pdf_basic(monkeypatch, tmp_path):
     monkeypatch.setattr(rt, "ensure_image", lambda runtime, root: None)
     monkeypatch.setattr(rt, "get_container_runtime", lambda: "docker")
     
-    # Mock the html file operations
-    def mock_open(path, mode="r", **kwargs):
-        from io import StringIO
-        return StringIO("<html><body>Mock</body></html>")
-    
-    monkeypatch.setattr("builtins.open", mock_open)
-    monkeypatch.setattr("md2.html_postprocess.add_toc_page_number_placeholders", lambda path, enabled: None)
-    monkeypatch.setattr("md2.toc_postprocess.postprocess_pdf_toc", lambda path, enabled: path)
-    
     conv.md2pdf([f])
-    assert len(rec.cmds) == 2  # Now calls md2html then html2pdf
+    assert len(rec.cmds) == 2  # md2html then html2pdf
     assert rec.cmds[0][0] == "docker"  # First call (md2html)
     assert rec.cmds[1][0] == "docker"  # Second call (html2pdf)
+    # Second call should use unified pdf_generator.sh
+    assert "pdf_generator.sh" in str(rec.cmds[1])
 
 
 def test_md2pdf_podman(monkeypatch, tmp_path):
@@ -61,18 +54,10 @@ def test_md2pdf_podman(monkeypatch, tmp_path):
     monkeypatch.setattr(rt, "ensure_image", lambda runtime, root: None)
     monkeypatch.setattr(rt, "get_container_runtime", lambda: "podman")
     
-    # Mock the html file operations
-    def mock_open(path, mode="r", **kwargs):
-        from io import StringIO
-        return StringIO("<html><body>Mock</body></html>")
-    
-    monkeypatch.setattr("builtins.open", mock_open)
-    monkeypatch.setattr("md2.html_postprocess.add_toc_page_number_placeholders", lambda path, enabled: None)
-    monkeypatch.setattr("md2.toc_postprocess.postprocess_pdf_toc", lambda path, enabled: path)
-    
     conv.md2pdf([f])
     assert rec.cmds[0][0] == "podman"  # First call should be podman
     assert rec.cmds[1][0] == "podman"  # Second call should be podman
+    assert "pdf_generator.sh" in str(rec.cmds[1])
 
 
 def test_toc_enabled_by_default(monkeypatch, tmp_path):
@@ -156,8 +141,8 @@ def test_temp_files_use_unique_names(monkeypatch, tmp_path):
     assert container_script_args[0] == "/work/tmp_abcd1234.md"
 
 
-def test_html2pdf_temp_pdf_with_page_numbers(monkeypatch, tmp_path):
-    # Test that page numbers enabled creates temp PDF first
+def test_html2pdf_with_page_numbers(monkeypatch, tmp_path):
+    # Test that page numbers enabled uses pdf_generator.sh
     f = tmp_path / "test.html"
     f.write_text("<html><body><h1>Test</h1></body></html>")
     rec = Recorder()
@@ -165,38 +150,19 @@ def test_html2pdf_temp_pdf_with_page_numbers(monkeypatch, tmp_path):
     monkeypatch.setattr(rt, "ensure_image", lambda runtime, root: None)
     monkeypatch.setattr(rt, "get_container_runtime", lambda: "docker")
     
-    # Mock uuid and postprocess function
-    import uuid
-    monkeypatch.setattr(uuid, "uuid4", lambda: type('obj', (object,), {"hex": "efgh5678" * 4})())
-    
-    def mock_postprocess(pdf_path, page_numbers_enabled):
-        # Mock that creates and returns the final PDF path
-        if page_numbers_enabled:
-            # Simulate processing: temp PDF becomes final PDF
-            final_pdf = pdf_path.with_name("test.pdf")
-            if pdf_path != final_pdf:
-                # Simulate moving temp to final
-                final_pdf.write_text("processed pdf content")
-                if pdf_path.exists():
-                    pdf_path.unlink()
-            return final_pdf
-        return pdf_path
-    
-    monkeypatch.setattr("md2.toc_postprocess.postprocess_pdf_toc", mock_postprocess)
-    
     result = conv.html2pdf([f], page_numbers=True)
     
-    # Check that temp PDF name was used in container command
+    # Check that pdf_generator.sh was used
     cmd = rec.cmds[0]
-    expected_temp_pdf = "tmp_efgh5678.pdf"
-    assert f"/work/{expected_temp_pdf}" in cmd
+    assert "pdf_generator.sh" in str(cmd)
+    assert "true" in cmd  # page_numbers=true
     
     # Final result should be the expected PDF name
     assert result[0].name == "test.pdf"
 
 
-def test_html2pdf_no_temp_pdf_without_page_numbers(monkeypatch, tmp_path):
-    # Test that page numbers disabled uses direct PDF name
+def test_html2pdf_no_page_numbers(monkeypatch, tmp_path):
+    # Test that page numbers disabled still uses pdf_generator.sh but with false
     f = tmp_path / "test.html"
     f.write_text("<html><body><h1>Test</h1></body></html>")
     rec = Recorder()
@@ -204,16 +170,12 @@ def test_html2pdf_no_temp_pdf_without_page_numbers(monkeypatch, tmp_path):
     monkeypatch.setattr(rt, "ensure_image", lambda runtime, root: None)
     monkeypatch.setattr(rt, "get_container_runtime", lambda: "docker")
     
-    def mock_postprocess(pdf_path, page_numbers_enabled):
-        return pdf_path
-    
-    monkeypatch.setattr("md2.toc_postprocess.postprocess_pdf_toc", mock_postprocess)
-    
     result = conv.html2pdf([f], page_numbers=False)
     
-    # Check that final PDF name was used directly in container command
+    # Check that pdf_generator.sh was used with page_numbers=false
     cmd = rec.cmds[0]
-    assert "/work/test.pdf" in cmd
+    assert "pdf_generator.sh" in str(cmd)
+    assert "false" in cmd  # page_numbers=false
     
     # Final result should be the expected PDF name
     assert result[0].name == "test.pdf"

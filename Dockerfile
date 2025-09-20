@@ -50,7 +50,7 @@ RUN npm install -g @mermaid-js/mermaid-cli@11.10.1
 ENV PUPPETEER_ARGS="--no-sandbox --disable-setuid-sandbox --disable-dev-shm-usage --disable-gpu"
 
 # Pin python filter tools
-RUN pip3 install --break-system-packages pandoc-mermaid-filter==0.1.0 pandocfilters==1.5.1
+RUN pip3 install --break-system-packages pandoc-mermaid-filter==0.1.0 pandocfilters==1.5.1 PyMuPDF==1.24.12
 
 # Provide MathJax locally to avoid network inside container
 RUN mkdir -p /mathjax && \
@@ -67,9 +67,11 @@ RUN chmod +x /usr/local/bin/mermaid
 WORKDIR /work
 
 COPY docker/md2html.sh /usr/local/bin/md2html.sh
+COPY docker/pdf_processor.py /usr/local/bin/pdf_processor.py
+COPY docker/pdf_generator.sh /usr/local/bin/pdf_generator.sh
 COPY docker/filters /filters
 COPY styles /styles
-RUN chmod +x /usr/local/bin/md2html.sh
+RUN chmod +x /usr/local/bin/md2html.sh /usr/local/bin/pdf_generator.sh
 
 WORKDIR /app
 COPY docker/package.json /app/package.json
