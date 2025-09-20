@@ -1,6 +1,7 @@
 from aimport import *
 import fitz
 import re
+import os
 from pathlib import Path
 from typing import Dict, Tuple, List
 
@@ -47,23 +48,41 @@ def replace_text_in_pdf(pdf_path: Path, replacements: Dict[str, str]) -> Path:
 
             # 3) Insert replacement numbers right-aligned inside the original rectangle
             for rect, replacement in jobs:
-                # Slightly shrink the rect to keep text inside bounds
-                pad_x = 1.0
-                pad_y = 0.5
+                # Expand width to avoid clipping and ensure room for right alignment
                 draw_rect = fitz.Rect(
-                    rect.x0 + pad_x,
-                    rect.y0 + pad_y,
-                    rect.x1 - pad_x,
-                    rect.y1 - pad_y,
+                    max(0, rect.x0 - 6.0),
+                    rect.y0 - 0.8,
+                    rect.x1 + 36.0,
+                    rect.y1 + 0.8,
                 )
-                # Right-align within the original placeholder rectangle
-                page.insert_textbox(
+                if os.environ.get("MD2_TOC_DEBUG"):
+                    page.draw_rect(draw_rect, color=(0.8, 0.2, 0.2), width=0.3)
+
+                overflow = page.insert_textbox(
                     draw_rect,
                     replacement,
-                    fontsize=10,
+                    fontsize=11,
                     color=(0, 0, 0),
+                    fontname="helv",
                     align=fitz.TEXT_ALIGN_RIGHT,
                 )
+                # Fallback: if overflow occurred, place text with absolute positioning, right-aligned by width
+                if overflow:
+                    try:
+                        width = fitz.get_text_length(
+                            replacement, fontname="helv", fontsize=11
+                        )
+                    except Exception:
+                        width = 0
+                    x = max(0, rect.x1 - 2.0 - width)
+                    y = rect.y1 - 0.8
+                    page.insert_text(
+                        (x, y),
+                        replacement,
+                        fontsize=11,
+                        color=(0, 0, 0),
+                        fontname="helv",
+                    )
 
         # Save the modified PDF
         doc.save(str(output_path))
@@ -80,15 +99,17 @@ def replace_text_in_pdf(pdf_path: Path, replacements: Dict[str, str]) -> Path:
     return pdf_path
 
 
-def calculate_text_position(placeholder_coords: Tuple[float, float, float, float], new_text: str) -> Tuple[float, float]:
+def calculate_text_position(
+    placeholder_coords: Tuple[float, float, float, float], new_text: str
+) -> Tuple[float, float]:
     """Calculate proper positioning for replacement text"""
     x0, y0, x1, y1 = placeholder_coords
-    
+
     # Position replacement text at the right edge of the placeholder area
     char_width = 6  # Approximate character width
     new_x = x1 - len(new_text) * char_width
     new_y = y1
-    
+
     return (new_x, new_y)
 
 
@@ -105,7 +126,9 @@ def apply_toc_page_numbers(pdf_path: Path) -> Path:
         for _ in page.search_for("P#"):
             pass  # cheap warm-up
         # Use page.get_text("words") to capture words and assemble matches
-        words = page.get_text("words")  # list of (x0, y0, x1, y1, word, block_no, line_no, word_no)
+        words = page.get_text(
+            "words"
+        )  # list of (x0, y0, x1, y1, word, block_no, line_no, word_no)
         # Identify tokens that look like P#dddd or P#dd
         for w in words:
             text = w[4]
@@ -119,6 +142,7 @@ def apply_toc_page_numbers(pdf_path: Path) -> Path:
 
     # Heuristic: identify TOC pages as those that contain many placeholders
     from collections import defaultdict
+
     by_page = defaultdict(list)
     for pno, rect, text in placeholder_rects:
         by_page[pno].append((rect, text))

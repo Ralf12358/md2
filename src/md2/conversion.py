@@ -111,7 +111,7 @@ def md2html(
     add_toc_placeholders: bool = False,
 ) -> List[Path]:
     from .html_postprocess import add_toc_page_number_placeholders
-    
+
     if markdown_flags is None:
         markdown_flags = ["--toc"]  # TOC enabled by default
 
@@ -255,7 +255,7 @@ def html2pdf(
     page_numbers: bool = True,
 ) -> List[Path]:
     from .toc_postprocess import postprocess_pdf_toc
-    
+
     runtime = runtime or rt.get_container_runtime()
     if ensure:
         rt.ensure_image(runtime, rt.project_root())
@@ -280,10 +280,10 @@ def html2pdf(
             ]
         )
         subprocess.run(cmd, check=True)
-        
+
         # Post-process TOC if page numbers enabled
         out_pdf = postprocess_pdf_toc(out_pdf, page_numbers)
-        
+
         results.append(out_pdf)
     return results
 
@@ -302,7 +302,7 @@ def md2pdf(
     page_numbers: bool = True,
 ) -> List[Path]:
     from .toc_postprocess import postprocess_pdf_toc
-    
+
     # First step: generate HTML with TOC placeholders
     html_paths = md2html(
         input_paths=input_paths,
@@ -317,7 +317,7 @@ def md2pdf(
         self_contained=self_contained,
         add_toc_placeholders=page_numbers,  # Add placeholders when page numbers enabled
     )
-    
+
     # Second step: convert HTML to PDF
     pdf_paths = html2pdf(
         html_paths,
@@ -325,7 +325,7 @@ def md2pdf(
         ensure=False,  # Already ensured in md2html
         page_numbers=page_numbers,
     )
-    
+
     return pdf_paths
 
 

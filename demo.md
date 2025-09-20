@@ -3,7 +3,7 @@
 ## Section A
 This is the first section.
 
-## Section B  
+## Section B
 This is the second section.
 
 ## Section C
