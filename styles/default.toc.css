@@ -56,6 +56,17 @@ body {
     counter-reset: h2 h3;
 }
 
+/* Screen-only: light grey outside the document area */
+@media screen {
+    html {
+        background: #f3f4f6;
+    }
+
+    body {
+        background: var(--color-bg);
+    }
+}
+
 h1,
 h2,
 h3,
