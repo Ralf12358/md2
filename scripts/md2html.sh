@@ -26,6 +26,7 @@ HTML_TITLE=""
 DOC_TITLE=""
 ENABLE_TOC=0
 TOC_DEPTH=""
+ADD_TOC_PLACEHOLDERS=false
 
 # If a third positional arg exists and is not an option, treat it as CSS
 if [[ $# -ge 3 && "${3}" != --* ]]; then
@@ -59,6 +60,9 @@ while [[ $# -gt 0 ]]; do
       ;;
     --toc-depth=*)
       TOC_DEPTH="${1#--toc-depth=}"
+      ;;
+    --add-toc-placeholders)
+      ADD_TOC_PLACEHOLDERS=true
       ;;
     *)
       # Ignore unknown arguments for now (markdown extension flags are not translated here)
@@ -313,4 +317,9 @@ if s2 != s:
   with io.open(path, 'w', encoding='utf-8') as f:
     f.write(s2)
 PY
+fi
+
+# Add TOC page number placeholders if requested
+if [[ "$ADD_TOC_PLACEHOLDERS" == "true" ]]; then
+  python3 /scripts/html_postprocess.py "$OUT" true
 fi

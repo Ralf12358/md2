@@ -24,7 +24,7 @@ node /app/print.js "$INPUT_HTML" "$TEMP_PDF" --pageNumbers="$PAGE_NUMBERS"
 echo "Processing PDF for page numbers: $PAGE_NUMBERS"
 
 # Process PDF for page numbers (if enabled) and move to final location
-python3 /usr/local/bin/pdf_processor.py "$TEMP_PDF" "$OUTPUT_PDF" "$PAGE_NUMBERS"
+python3 /scripts/pdf_processor.py "$TEMP_PDF" "$OUTPUT_PDF" "$PAGE_NUMBERS"
 
 # Clean up temporary file
 rm -f "$TEMP_PDF"

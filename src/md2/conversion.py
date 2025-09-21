@@ -109,7 +109,6 @@ def md2html(
     self_contained: bool = True,  # Default True: embeds MathJax + resources for offline use
     add_toc_placeholders: bool = False,
 ) -> List[Path]:
-    from .html_postprocess import add_toc_page_number_placeholders
 
     if markdown_flags is None:
         markdown_flags = ["--toc"]  # TOC enabled by default
@@ -134,7 +133,7 @@ def md2html(
     markdown_flags = processed_flags
     runtime = runtime or rt.get_container_runtime()
     if ensure:
-        rt.ensure_image(runtime, rt.project_root())
+        rt.ensure_image(runtime, rt.PROJECT_ROOT)
 
     results = []
     for p in input_paths:
@@ -182,11 +181,11 @@ def md2html(
             "-v",
             f"{in_dir}:/work",
             "-v",
-            f"{_styles_dir()}:/styles:ro",
+            f"{rt.PROJECT_ROOT}/styles:/styles:ro",
             "-v",
-            f"{rt.get_docker_filters_path()}:/filters:ro",
+            f"{rt.PROJECT_ROOT}/filters:/filters:ro",
             "-v",
-            f"{rt.get_docker_script_path()}:/usr/local/bin/md2html.sh:ro",
+            f"{rt.PROJECT_ROOT}/scripts:/scripts:ro",
         ]
         cmd += css_mount
         if self_contained:
@@ -200,7 +199,7 @@ def md2html(
                 cmd += ["-e", f"INTERNAL_RESOURCES={internal}"]
         cmd.append(rt.IMAGE_NAME)
 
-        inner = ["bash", "/usr/local/bin/md2html.sh", container_in, container_out]
+        inner = ["bash", "/scripts/md2html.sh", container_in, container_out]
         if css_arg:
             inner.append(css_arg)
 
@@ -234,15 +233,16 @@ def md2html(
         if html_css:
             inner.extend([f"--html-css={html_css}"])
 
+        # Add TOC placeholders flag if needed
+        if add_toc_placeholders:
+            inner.extend(["--add-toc-placeholders"])
+
         cmd += inner
         subprocess.run(cmd, check=True)
 
         # Clean up temporary file if created
         if temp_file and temp_file.exists():
             temp_file.unlink()
-
-        # Add TOC placeholders if needed
-        add_toc_page_number_placeholders(out_abs, add_toc_placeholders)
 
         results.append(out_abs)
     return results
@@ -256,7 +256,7 @@ def html2pdf(
 ) -> List[Path]:
     runtime = runtime or rt.get_container_runtime()
     if ensure:
-        rt.ensure_image(runtime, rt.project_root())
+        rt.ensure_image(runtime, rt.PROJECT_ROOT)
 
     results = []
     for p in input_paths:
@@ -271,9 +271,11 @@ def html2pdf(
             + [
                 "-v",
                 f"{in_dir}:/work",
+                "-v",
+                f"{rt.PROJECT_ROOT}/scripts:/scripts:ro",
                 rt.IMAGE_NAME,
                 "bash",
-                "/usr/local/bin/pdf_generator.sh",
+                "/scripts/pdf_generator.sh",
                 f"/work/{p.name}",
                 f"/work/{out_pdf.name}",
                 str(page_numbers).lower(),
@@ -299,8 +301,6 @@ def md2pdf(
     page_numbers: bool = True,
 ) -> List[Path]:
     # Generate HTML with TOC placeholders if page numbers are enabled
-    from .html_postprocess import add_toc_page_number_placeholders
-
     html_paths = md2html(
         input_paths=input_paths,
         css=css,
@@ -327,13 +327,7 @@ def md2pdf(
 
 
 def _styles_dir() -> Path:
-    # For development environment
-    dev_path = rt.project_root() / "styles"
-    if dev_path.exists():
-        return dev_path
-
-    # For installed package
-    return Path(__file__).parent / "styles"
+    return rt.PROJECT_ROOT / "styles"
 
 
 def md2docx(
@@ -363,7 +357,7 @@ def md2docx(
     markdown_flags = processed_flags
     runtime = runtime or rt.get_container_runtime()
     if ensure:
-        rt.ensure_image(runtime, rt.project_root())
+        rt.ensure_image(runtime, rt.PROJECT_ROOT)
 
     results: List[Path] = []
     for p in input_paths:
@@ -402,7 +396,7 @@ def md2docx(
             "-v",
             f"{_styles_dir()}:/styles:ro",
             "-v",
-            f"{rt.project_root()}/docker/filters:/filters:ro",
+            f"{rt.PROJECT_ROOT}/filters:/filters:ro",
         ]
         if reference_doc:
             ref_abs = Path(reference_doc).resolve()

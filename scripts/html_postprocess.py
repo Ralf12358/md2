@@ -1,5 +1,6 @@
-from aimport import *
+#!/usr/bin/env python3
 import re
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -48,6 +49,20 @@ def add_toc_page_number_placeholders(
         with open(html_path, "w", encoding="utf-8") as f:
             f.write(content)
 
-    except Exception:
+    except Exception as e:
         # If processing fails, keep original file
-        pass
+        print(f"Warning: HTML postprocessing failed: {e}", file=sys.stderr)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print(
+            "Usage: html_postprocess.py <html_file> <page_numbers_enabled>",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    html_file = Path(sys.argv[1])
+    page_numbers_enabled = sys.argv[2].lower() in ("true", "1", "yes")
+
+    add_toc_page_number_placeholders(html_file, page_numbers_enabled)

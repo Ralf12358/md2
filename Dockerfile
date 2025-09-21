@@ -61,22 +61,12 @@ RUN mkdir -p /mathjax && \
     rm -rf /tmp/package /tmp/mathjax.tgz
 
 RUN printf '{\n  "args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]\n}\n' > /usr/local/bin/puppeteer.json
-COPY docker/bin/mermaid /usr/local/bin/mermaid
-RUN chmod +x /usr/local/bin/mermaid
-
-WORKDIR /work
-
-COPY docker/md2html.sh /usr/local/bin/md2html.sh
-COPY docker/pdf_processor.py /usr/local/bin/pdf_processor.py
-COPY docker/pdf_generator.sh /usr/local/bin/pdf_generator.sh
-COPY docker/filters /filters
-COPY styles /styles
-RUN chmod +x /usr/local/bin/md2html.sh /usr/local/bin/pdf_generator.sh
 
 WORKDIR /app
-COPY docker/package.json /app/package.json
+COPY scripts/package.json /app/package.json
 RUN npm install --omit=dev && \
     chmod -R a+rx /opt/puppeteer || true
-COPY docker/print.js /app/print.js
+RUN printf '#!/usr/bin/env bash\nexec mmdc "$@"\n' > /usr/local/bin/mermaid && chmod +x /usr/local/bin/mermaid
+COPY scripts/print.js /app/print.js
 
 WORKDIR /work
