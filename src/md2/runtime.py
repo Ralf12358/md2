@@ -1,4 +1,3 @@
-from aimport import *
 import subprocess
 import shutil
 import os

@@ -3,21 +3,6 @@ revision = 1
 requires-python = ">=3.10"
 
 [[package]]
-name = "aimport"
-version = "2.1.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/91/45/813e977d996163db52775d15cb370aec8bc1ea0a3eb33f3967b5aeb4ccf3/aimport-2.1.0.tar.gz", hash = "sha256:a5f533c8c5d2be63422eba14ce34464d29da04dbd12577832755ed53b5b652c2", size = 8830 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/cb/7e/1ad43683dff19c8c42e1fa8eacef2afcf21e27bdd0c450651326ef4fbdc5/aimport-2.1.0-py3-none-any.whl", hash = "sha256:38ceb283bb2ced984a02ff428863e293416c03dea3429c08318d91e5c48bc6d2", size = 4569 },
-]
-
-[[package]]
 name = "md2"
 version = "0.8.0"
 source = { editable = "." }
-dependencies = [
-    { name = "aimport" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "aimport", specifier = "==2.1.0" }]
