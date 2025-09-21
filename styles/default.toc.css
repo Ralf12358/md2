@@ -670,25 +670,14 @@ nav#TOC a:hover,
     text-decoration: underline;
 }
 
-/* TOC page numbers with dot leaders */
+/* TOC page numbers (placeholders for PDF processing) */
 body.toc-page-numbers nav#TOC a::after,
 body.toc-page-numbers #TOC a::after,
 body.toc-page-numbers .toc a::after {
-    content: " ............ " attr(data-toc-placeholder);
-    float: right;
-    color: #fafbfc;
+    content: attr(data-toc-placeholder);
+    color: #fafbfc !important;
     font-variant-numeric: tabular-nums;
-    letter-spacing: 0.1em;
-}
-
-/* Ensure proper spacing for TOC entries with page numbers */
-body.toc-page-numbers nav#TOC a,
-body.toc-page-numbers #TOC a,
-body.toc-page-numbers .toc a {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    padding-right: 4em;
+    float: right;
 }
 
 nav#TOC>ul>li,
@@ -895,17 +884,5 @@ nav#TOC>ul>li>ul>li>ul>li::before,
     .toc li {
         break-inside: auto;
         page-break-inside: auto;
-    }
-}
-
-/* Print: use shorter dot leaders for better formatting */
-@media print {
-
-    body.toc-page-numbers nav#TOC a::after,
-    body.toc-page-numbers #TOC a::after,
-    body.toc-page-numbers .toc a::after {
-        content: " ........ " attr(data-toc-placeholder);
-        letter-spacing: 0.08em;
-        color: #fafbfc;
     }
 }
