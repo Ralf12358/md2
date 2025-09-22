@@ -27,7 +27,13 @@ def get_user_args(runtime: str) -> List[str]:
         else:
             args += ["--network=host"]
         return args
-    return ["--user", f"{os.getuid()}:{os.getgid()}"]
+    
+    # For Docker, only set user on Unix systems
+    if hasattr(os, 'getuid') and hasattr(os, 'getgid'):
+        return ["--user", f"{os.getuid()}:{os.getgid()}"]
+    else:
+        # Windows or other systems without uid/gid
+        return []
 
 
 def get_security_args(runtime: str) -> List[str]:
