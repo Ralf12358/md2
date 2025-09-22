@@ -1,4 +1,3 @@
-from aimport import *
 import md2.runtime as rt
 import md2.conversion as conv
 

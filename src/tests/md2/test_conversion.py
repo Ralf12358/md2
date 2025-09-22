@@ -1,4 +1,3 @@
-from aimport import *
 from pathlib import Path
 import md2.conversion as conv
 import md2.runtime as rt
