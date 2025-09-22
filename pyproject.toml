@@ -4,7 +4,7 @@ version = "0.8.0"
 description = "Markdown -> HTML -> PDF via Podman/Docker (pandoc+mermaid+mathjax+puppeteer)"
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
+license = "MIT"
 authors = [{ name = "Ralf Schneider" }]
 dependencies = []
 
@@ -20,6 +20,9 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+md2 = ["Dockerfile", "filters/*", "scripts/*", "styles/*"]
 
 
 [tool.pytest.ini_options]

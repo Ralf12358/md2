@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import List
 
 IMAGE_NAME = "md2:latest"
-PROJECT_ROOT = Path(__file__).parent.parent.parent
+PROJECT_ROOT = Path(__file__).parent
 
 
 def get_container_runtime() -> str:
