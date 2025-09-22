@@ -63,10 +63,10 @@ RUN mkdir -p /mathjax && \
 RUN printf '{\n  "args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]\n}\n' > /usr/local/bin/puppeteer.json
 
 WORKDIR /app
-COPY scripts/package.json /app/package.json
+COPY src/md2/scripts/package.json /app/package.json
 RUN npm install --omit=dev && \
     chmod -R a+rx /opt/puppeteer || true
 RUN printf '#!/usr/bin/env bash\nexec mmdc "$@"\n' > /usr/local/bin/mermaid && chmod +x /usr/local/bin/mermaid
-COPY scripts/print.js /app/print.js
+COPY src/md2/scripts/print.js /app/print.js
 
 WORKDIR /work
