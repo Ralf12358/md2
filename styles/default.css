@@ -127,6 +127,39 @@ h3 {
     margin: var(--print-h3-mt) 0 var(--print-h3-mb);
 }
 
+/* Screen-only overrides for larger, lighter headings */
+@media screen {
+    h1 {
+        font-size: calc((var(--print-heading-scale-h1) + 0.2) * 1em) !important;
+        font-weight: 300 !important;
+    }
+
+    h2 {
+        font-size: calc((var(--print-heading-scale-h2) + 0.2) * 1em) !important;
+        font-weight: 300 !important;
+    }
+
+    h3 {
+        font-size: calc((var(--print-heading-scale-h3) + 0.1) * 1em) !important;
+        font-weight: 300 !important;
+    }
+
+    h4 {
+        font-size: calc((var(--print-heading-scale-h4) + 0.1) * 1em) !important;
+        font-weight: 300 !important;
+    }
+
+    h5 {
+        font-size: calc((var(--print-heading-scale-h5) + 0.1) * 1em) !important;
+        font-weight: 300 !important;
+    }
+
+    h6 {
+        font-size: calc((var(--print-heading-scale-h6) + 0.1) * 1em) !important;
+        font-weight: 300 !important;
+    }
+}
+
 h2::before {
     content: counter(h2) " ";
     color: var(--color-muted);
