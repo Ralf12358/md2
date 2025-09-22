@@ -10,9 +10,9 @@
     --table-header-bg: #f6f8fa;
     --code-bg: #f6f8fa;
     --math-color: #30363d;
-    --math-scale: 0.9;
+    --math-scale: var(--print-math-scale);
     /* PRINT DENSITY SETTINGS (adjust these to control PDF compactness) */
-    --print-base-size: 8.5pt;
+    --print-base-size: 12px;
     /* Base body font-size when printing */
     --print-line-height: 1.35;
     /* Line height for body text when printing */
@@ -20,13 +20,13 @@
     /* Top/bottom page padding */
     --print-page-padding-inline: 10mm;
     /* Left/right page padding */
-    --print-heading-scale-h1: 1.45;
+    --print-heading-scale-h1: 2.0;
     /* h1 size multiplier (relative to 1rem) */
-    --print-heading-scale-h2: 1.22;
-    --print-heading-scale-h3: 1.1;
-    --print-heading-scale-h4: 1.0;
-    --print-heading-scale-h5: 0.95;
-    --print-heading-scale-h6: 0.88;
+    --print-heading-scale-h2: 1.6;
+    --print-heading-scale-h3: 1.3;
+    --print-heading-scale-h4: 1.1;
+    --print-heading-scale-h5: 1.0;
+    --print-heading-scale-h6: 0.9;
     --print-block-spacing: 0.65em;
     /* Vertical spacing for paragraphs/lists */
     --print-table-font-scale: 0.88;
@@ -72,15 +72,18 @@
 html {
     background: var(--color-bg);
     color: var(--color-fg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
 body {
     font-family: var(--font-body);
-    font-size: 15px !important;
-    line-height: 1.6;
+    font-size: var(--print-base-size) !important;
+    line-height: var(--print-line-height);
     margin: 0 auto;
     max-width: 900px;
-    padding: 32px 24px;
+    padding: var(--print-page-padding-block) var(--print-page-padding-inline);
     counter-reset: h2 h3;
 }
 
@@ -102,26 +105,26 @@ h4,
 h5,
 h6 {
     line-height: 1.25;
-    font-weight: 500;
+    font-weight: 400;
 }
 
 h1 {
-    font-size: 1.75rem;
+    font-size: calc(var(--print-heading-scale-h1) * 1em);
     counter-reset: h2 h3;
-    margin: var(--h1-mt) 0 var(--h1-mb);
+    margin: var(--print-h1-mt) 0 var(--print-h1-mb);
 }
 
 h2 {
-    font-size: 1.375rem;
+    font-size: calc(var(--print-heading-scale-h2) * 1em);
     counter-increment: h2;
     counter-reset: h3;
-    margin: var(--h2-mt) 0 var(--h2-mb);
+    margin: var(--print-h2-mt) 0 var(--print-h2-mb);
 }
 
 h3 {
-    font-size: 1.1rem;
+    font-size: calc(var(--print-heading-scale-h3) * 1em);
     counter-increment: h3;
-    margin: var(--h3-mt) 0 var(--h3-mb);
+    margin: var(--print-h3-mt) 0 var(--print-h3-mb);
 }
 
 h2::before {
@@ -148,19 +151,19 @@ section.level2 {
 }
 
 h4 {
-    font-size: 1.04rem;
-    margin: var(--h4-mt) 0 var(--h4-mb);
+    font-size: calc(var(--print-heading-scale-h4) * 1em);
+    margin: var(--print-h4-mt) 0 var(--print-h4-mb);
 }
 
 h5 {
-    font-size: 0.96rem;
-    margin: var(--h5-mt) 0 var(--h5-mb);
+    font-size: calc(var(--print-heading-scale-h5) * 1em);
+    margin: var(--print-h5-mt) 0 var(--print-h5-mb);
 }
 
 h6 {
-    font-size: 0.9rem;
+    font-size: calc(var(--print-heading-scale-h6) * 1em);
     color: var(--color-muted);
-    margin: var(--h6-mt) 0 var(--h6-mb);
+    margin: var(--print-h6-mt) 0 var(--print-h6-mb);
 }
 
 /* Adjacent headings: remove extra top margin for deeper subheadings */
@@ -204,17 +207,17 @@ h6+h6 {
 /* Removed over-broad equal-level across-section rule to preserve spacing */
 
 p {
-    margin: 0.8em 0;
+    margin: var(--print-block-spacing) 0;
 }
 
 ul,
 ol {
-    margin: 0.8em 0 0.8em 1.5em;
+    margin: var(--print-block-spacing) 0 var(--print-block-spacing) 1.4em;
 }
 
 li>ul,
 li>ol {
-    margin-top: 0.4em;
+    margin-top: calc(var(--print-block-spacing) * 0.5);
 }
 
 a {
@@ -231,7 +234,7 @@ svg {
     max-width: 100%;
     height: auto;
     /* Limit diagram height to prevent spanning multiple pages */
-    max-height: 85vh;
+    max-height: min(85vh, 135mm);
     /* In print: limit to ~150% of page width or reasonable page height */
 }
 
@@ -248,7 +251,7 @@ li:has(.mjx-container:not([display="true"])),
 li:has(.math.inline) {
     margin-top: 0.7em;
     margin-bottom: 0.7em;
-    line-height: 1.7;
+    line-height: 1.5;
 }
 
 /* MathJax SVG output tweaks: lighter appearance */
@@ -286,15 +289,15 @@ li:has(.math.inline) {
 
 /* Inline math spacing: allow more breathing room in text lines */
 .katex:not(.katex-display) {
-    line-height: 1.7 !important;
-    padding-top: 0.04em;
-    padding-bottom: 0.04em;
+    line-height: 1.5 !important;
+    padding-top: 0.06em;
+    padding-bottom: 0.06em;
 }
 
 .mjx-container:not([display="true"]) {
-    line-height: 1.7 !important;
-    padding-top: 0.04em;
-    padding-bottom: 0.04em;
+    line-height: 1.5 !important;
+    padding-top: 0.06em;
+    padding-bottom: 0.06em;
 }
 
 /* Do not alter display math spacing */
@@ -304,9 +307,9 @@ li:has(.math.inline) {
 }
 
 .math.inline {
-    line-height: 1.7 !important;
-    padding-top: 0.04em;
-    padding-bottom: 0.04em;
+    line-height: 1.5 !important;
+    padding-top: 0.06em;
+    padding-bottom: 0.06em;
 }
 
 
@@ -360,12 +363,13 @@ code,
 kbd,
 samp {
     font-family: var(--font-mono);
-    font-size: 0.95em;
+    font-size: calc(var(--print-code-font-scale) * 0.95em);
 }
 
 pre {
     background: var(--code-bg);
-    padding: 12px 14px;
+    font-size: calc(var(--print-code-font-scale) * 1em);
+    padding: 8px 10px;
     overflow: auto;
     border: 1px solid var(--color-border);
     border-radius: 6px;
@@ -380,7 +384,7 @@ table {
     border-collapse: collapse;
     width: 100%;
     font-variant-numeric: tabular-nums;
-    font-size: 0.94em;
+    font-size: calc(var(--print-table-font-scale) * 1em);
 }
 
 /* Add spacing when one table directly follows another */
@@ -391,7 +395,7 @@ table+table {
 th,
 td {
     border: 1px solid var(--color-border);
-    padding: 6px 8px;
+    padding: var(--print-table-cell-padding-y) var(--print-table-cell-padding-x);
     vertical-align: top;
 }
 
@@ -418,12 +422,6 @@ hr {
 
 /* Print adjustments */
 @media print {
-    body {
-        padding: var(--print-page-padding-block) var(--print-page-padding-inline);
-        font-size: var(--print-base-size) !important;
-        line-height: var(--print-line-height);
-    }
-
     a {
         color: inherit;
         text-decoration: none;
@@ -433,7 +431,6 @@ hr {
     p {
         widows: 3;
         orphans: 3;
-        margin: var(--print-block-spacing) 0;
     }
 
     /* Prefer smart breaks instead of always forcing new pages */
@@ -459,71 +456,17 @@ hr {
     h6 {
         break-after: avoid;
         page-break-after: avoid;
-        margin: 0.9em 0 0.45em;
     }
 
-    h1 {
-        font-size: calc(var(--print-heading-scale-h1) * 1rem);
-    }
+    /* Heading sizes unified in base */
 
-    h2 {
-        font-size: calc(var(--print-heading-scale-h2) * 1rem);
-    }
+    /* Heading margins unified in base */
 
-    h3 {
-        font-size: calc(var(--print-heading-scale-h3) * 1rem);
-    }
+    /* List spacing unified in base */
 
-    h4 {
-        font-size: calc(var(--print-heading-scale-h4) * 1rem);
-    }
+    /* Table/code sizing unified in base */
 
-    h5 {
-        font-size: calc(var(--print-heading-scale-h5) * 1rem);
-    }
-
-    h6 {
-        font-size: calc(var(--print-heading-scale-h6) * 1rem);
-    }
-
-    /* Extra spacing before h2 in print (~one extra line) */
-    h2 {
-        margin-top: calc(0.9em + 1em);
-    }
-
-    /* Slightly less extra spacing before h3 (~20% less than h2) */
-    h3 {
-        margin-top: calc(0.9em + 0.8em);
-    }
-
-    ul,
-    ol {
-        margin: var(--print-block-spacing) 0 var(--print-block-spacing) 1.4em;
-    }
-
-    table {
-        font-size: calc(var(--print-table-font-scale) * 1em);
-    }
-
-    th,
-    td {
-        padding: var(--print-table-cell-padding-y) var(--print-table-cell-padding-x);
-    }
-
-    pre {
-        font-size: calc(var(--print-code-font-scale) * 1em);
-        padding: 8px 10px;
-    }
-
-    code,
-    kbd,
-    samp {
-        font-size: calc(var(--print-code-font-scale) * 0.95em);
-    }
-
-    :root {
-        --math-scale: var(--print-math-scale);
-    }
+    /* Math scale unified in base */
 
     /* Keep common block elements intact on a page when possible */
     pre,
@@ -542,14 +485,7 @@ hr {
     }
 
     /* Limit diagram height in print to prevent spanning multiple pages */
-    img,
-    svg {
-        max-height: 85vh;
-        /* Roughly 85% of viewport height */
-        /* Alternative: limit to ~150% of page width */
-        max-height: min(85vh, 135mm);
-        /* 135mm ≈ 150% of typical page width */
-    }
+    /* Diagram sizing unified in base */
 
     /* Rows shouldn't break individually */
     tr {
