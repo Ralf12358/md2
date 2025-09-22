@@ -28,3 +28,9 @@ md2 = ["Dockerfile", "filters/*", "scripts/*", "styles/*"]
 [tool.pytest.ini_options]
 addopts = "-q --timeout=10"
 testpaths = ["src/tests/md2"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+    "pytest-timeout>=2.4.0",
+]

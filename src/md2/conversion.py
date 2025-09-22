@@ -138,6 +138,35 @@ def md2html(
     for p in input_paths:
         p = Path(p).resolve()
         abs_in = p.resolve()
+
+        # Check for remote images and validate if present
+        with open(abs_in, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Only validate if there are HTTP/HTTPS images
+        if re.search(r'!\[[^\]]*\]\([^)]*https?://[^)]+\)', content):
+            scripts_path = Path(__file__).parent / "scripts"
+            validation_cmd = [
+                runtime,
+                "run",
+                "--rm",
+                "--userns=keep-id",
+                "--network=host",
+                "-v",
+                f"{abs_in.parent}:/work:ro",
+                "-v",
+                f"{scripts_path}:/scripts:ro",
+                "md2:latest",
+                "python3",
+                "/scripts/validate_images.py",
+                f"/work/{abs_in.name}"
+            ]
+            
+            try:
+                subprocess.run(validation_cmd, check=False, capture_output=False)
+            except Exception:
+                pass
+
         out_abs = abs_in.with_suffix(".html")
         in_dir = abs_in.parent
 
