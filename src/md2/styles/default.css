@@ -24,8 +24,8 @@
     /* h1 size multiplier (relative to 1rem) */
     --print-heading-scale-h2: 1.22;
     --print-heading-scale-h3: 1.1;
-    --print-heading-scale-h4: 1.02;
-    --print-heading-scale-h5: 0.98;
+    --print-heading-scale-h4: 1.0;
+    --print-heading-scale-h5: 0.95;
     --print-heading-scale-h6: 0.88;
     --print-block-spacing: 0.65em;
     /* Vertical spacing for paragraphs/lists */
@@ -39,6 +39,34 @@
     /* Code/pre font scaling */
     --print-math-scale: 0.8;
     /* Math formula scaling */
+
+    /* SCREEN heading spacing (top/bottom) */
+    --h1-mt: 1.05em;
+    --h1-mb: 0.5em;
+    --h2-mt: 2.25em;
+    --h2-mb: 0.5em;
+    --h3-mt: 1.8em;
+    --h3-mb: 0.5em;
+    --h4-mt: 1.5em;
+    --h4-mb: 0.5em;
+    --h5-mt: 1.3em;
+    --h5-mb: 0.5em;
+    --h6-mt: 1.2em;
+    --h6-mb: 0.5em;
+
+    /* PRINT heading spacing (top/bottom) */
+    --print-h1-mt: 0.9em;
+    --print-h1-mb: 0.45em;
+    --print-h2-mt: calc(0.9em + 1em);
+    --print-h2-mb: 0.45em;
+    --print-h3-mt: calc(0.9em + 0.8em);
+    --print-h3-mb: 0.45em;
+    --print-h4-mt: 1.0em;
+    --print-h4-mb: 0.45em;
+    --print-h5-mt: 0.95em;
+    --print-h5-mb: 0.45em;
+    --print-h6-mt: 0.9em;
+    --print-h6-mb: 0.45em;
 }
 
 html {
@@ -74,27 +102,26 @@ h4,
 h5,
 h6 {
     line-height: 1.25;
-    margin: 1.05em 0 0.5em;
     font-weight: 500;
 }
 
 h1 {
     font-size: 1.75rem;
     counter-reset: h2 h3;
+    margin: var(--h1-mt) 0 var(--h1-mb);
 }
 
 h2 {
     font-size: 1.375rem;
     counter-increment: h2;
     counter-reset: h3;
-    /* add extra space before h2, but slightly reduced */
-    margin-top: 2.25em;
+    margin: var(--h2-mt) 0 var(--h2-mb);
 }
 
 h3 {
-    font-size: 1.2rem;
-    margin-top: 1.8em;
+    font-size: 1.1rem;
     counter-increment: h3;
+    margin: var(--h3-mt) 0 var(--h3-mb);
 }
 
 h2::before {
@@ -121,17 +148,60 @@ section.level2 {
 }
 
 h4 {
-    font-size: 1.1rem;
+    font-size: 1.04rem;
+    margin: var(--h4-mt) 0 var(--h4-mb);
 }
 
 h5 {
-    font-size: 0.975rem;
+    font-size: 0.96rem;
+    margin: var(--h5-mt) 0 var(--h5-mb);
 }
 
 h6 {
-    font-size: 0.925rem;
+    font-size: 0.9rem;
     color: var(--color-muted);
+    margin: var(--h6-mt) 0 var(--h6-mb);
 }
+
+/* Adjacent headings: remove extra top margin for deeper subheadings */
+h1+h2,
+h1+h3,
+h1+h4,
+h1+h5,
+h1+h6,
+h2+h3,
+h2+h4,
+h2+h5,
+h2+h6,
+h3+h4,
+h3+h5,
+h3+h6,
+h4+h5,
+h4+h6,
+h5+h6 {
+    margin-top: 0;
+}
+
+/* Adjacent headings across Pandoc section wrappers */
+h1+section.level2>h2:first-child,
+h2+section.level3>h3:first-child,
+h3+section.level4>h4:first-child,
+h4+section.level5>h5:first-child,
+h5+section.level6>h6:first-child {
+    margin-top: 0;
+}
+
+/* Adjacent equal-level headings (siblings) */
+h1+h1,
+h2+h2,
+h3+h3,
+h4+h4,
+h5+h5,
+h6+h6 {
+    margin-top: 0;
+}
+
+/* Removed over-broad equal-level across-section rule to preserve spacing */
 
 p {
     margin: 0.8em 0;
@@ -178,7 +248,6 @@ li:has(.mjx-container:not([display="true"])),
 li:has(.math.inline) {
     margin-top: 0.7em;
     margin-bottom: 0.7em;
-    line-height: 1.5;
     line-height: 1.7;
 }
 
@@ -345,14 +414,6 @@ hr {
     margin: 1em 0;
 }
 
-/* TOC page break */
-nav#TOC,
-#TOC,
-.toc {
-    break-before: page;
-    page-break-before: always;
-}
-
 /* Print adjustments */
 @media print {
     body {
@@ -396,42 +457,78 @@ nav#TOC,
     h6 {
         break-after: avoid;
         page-break-after: avoid;
-        margin: 0.9em 0 0.45em;
     }
 
+    /* Print heading sizing and spacing */
     h1 {
         font-size: calc(var(--print-heading-scale-h1) * 1rem);
+        margin: var(--print-h1-mt) 0 var(--print-h1-mb);
     }
 
     h2 {
         font-size: calc(var(--print-heading-scale-h2) * 1rem);
+        margin: var(--print-h2-mt) 0 var(--print-h2-mb);
     }
 
     h3 {
         font-size: calc(var(--print-heading-scale-h3) * 1rem);
+        margin: var(--print-h3-mt) 0 var(--print-h3-mb);
     }
 
     h4 {
         font-size: calc(var(--print-heading-scale-h4) * 1rem);
+        margin: var(--print-h4-mt) 0 var(--print-h4-mb);
     }
 
     h5 {
         font-size: calc(var(--print-heading-scale-h5) * 1rem);
+        margin: var(--print-h5-mt) 0 var(--print-h5-mb);
     }
 
     h6 {
         font-size: calc(var(--print-heading-scale-h6) * 1rem);
+        margin: var(--print-h6-mt) 0 var(--print-h6-mb);
     }
 
-    /* Extra spacing before h2 in print (~one extra line) */
-    h2 {
-        margin-top: calc(0.9em + 1em);
+    /* Adjacent headings in print: remove extra top margin for deeper subheadings */
+    h1+h2,
+    h1+h3,
+    h1+h4,
+    h1+h5,
+    h1+h6,
+    h2+h3,
+    h2+h4,
+    h2+h5,
+    h2+h6,
+    h3+h4,
+    h3+h5,
+    h3+h6,
+    h4+h5,
+    h4+h6,
+    h5+h6 {
+        margin-top: 0;
     }
 
-    /* Slightly less extra spacing before h3 (~20% less than h2) */
-    h3 {
-        margin-top: calc(0.9em + 0.8em);
+    /* Adjacent headings across Pandoc section wrappers (print) */
+    h1+section.level2>h2:first-child,
+    h2+section.level3>h3:first-child,
+    h3+section.level4>h4:first-child,
+    h4+section.level5>h5:first-child,
+    h5+section.level6>h6:first-child {
+        margin-top: 0;
     }
+
+    /* Adjacent equal-level headings in print (siblings) */
+    h1+h1,
+    h2+h2,
+    h3+h3,
+    h4+h4,
+    h5+h5,
+    h6+h6 {
+        margin-top: 0;
+    }
+
+    /* Removed over-broad equal-level across-section rule in print */
 
     ul,
     ol {
@@ -481,11 +578,8 @@ nav#TOC,
     /* Limit diagram height in print to prevent spanning multiple pages */
     img,
     svg {
-        max-height: 85vh;
-        /* Roughly 85% of viewport height */
-        /* Alternative: limit to ~150% of page width */
+        /* Roughly 85% of viewport height or ~150% of page width */
         max-height: min(85vh, 135mm);
-        /* 135mm ≈ 150% of typical page width */
     }
 
     /* Rows shouldn't break individually */
@@ -549,16 +643,7 @@ nav#TOC,
         page-break-before: always;
     }
 
-    /* If a TOC exists right after the title, start it on a new page */
-    body>h1:first-of-type~nav#TOC,
-    body>h1:first-of-type~#TOC,
-    body>h1:first-of-type~.toc,
-    section.level1:first-of-type>h1:first-of-type~nav#TOC,
-    section.level1:first-of-type>h1:first-of-type~#TOC,
-    section.level1:first-of-type>h1:first-of-type~.toc {
-        break-before: page;
-        page-break-before: always;
-    }
+    /* TOC-specific rules are defined in default.toc.css */
 
     /* Keep typical intro blocks intact on the title page */
     body>h1:first-of-type~pre,
@@ -691,6 +776,19 @@ nav#TOC,
         break-inside: avoid-page;
         page-break-inside: avoid;
     }
+
+    /* Keep heading + short lead paragraph together with the next large block
+       This prevents a lonely heading with a single intro line at page bottom
+       when the next block (e.g., table) starts on the following page. */
+    h1:not(:first-of-type)+p:has(+ :is(table, figure, pre, ul, ol, .math.display, .katex-display, .mjx-container[display="true"])),
+    h2+p:has(+ :is(table, figure, pre, ul, ol, .math.display, .katex-display, .mjx-container[display="true"])),
+    h3+p:has(+ :is(table, figure, pre, ul, ol, .math.display, .katex-display, .mjx-container[display="true"])),
+    h4+p:has(+ :is(table, figure, pre, ul, ol, .math.display, .katex-display, .mjx-container[display="true"])),
+    h5+p:has(+ :is(table, figure, pre, ul, ol, .math.display, .katex-display, .mjx-container[display="true"])),
+    h6+p:has(+ :is(table, figure, pre, ul, ol, .math.display, .katex-display, .mjx-container[display="true"])) {
+        break-after: avoid-page;
+        page-break-after: avoid;
+    }
 }
 
 /* Print: top-priority rule — never break at headings */
@@ -709,19 +807,4 @@ nav#TOC,
     }
 }
 
-/* Print: allow TOC to split across pages (override global list rules) */
-@media print {
-
-    nav#TOC ul,
-    nav#TOC ol,
-    nav#TOC li,
-    #TOC ul,
-    #TOC ol,
-    #TOC li,
-    .toc ul,
-    .toc ol,
-    .toc li {
-        break-inside: auto;
-        page-break-inside: auto;
-    }
-}
+/* TOC list splitting rules live in default.toc.css */
