@@ -1,6 +1,6 @@
 [project]
 name = "md2"
-version = "0.8.2"
+version = "0.8.3"
 description = "Markdown -> HTML -> PDF via Podman/Docker (pandoc+mermaid+mathjax+puppeteer)"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -30,7 +30,4 @@ addopts = "-q --timeout=10"
 testpaths = ["src/tests/md2"]
 
 [dependency-groups]
-dev = [
-    "pytest>=8.4.2",
-    "pytest-timeout>=2.4.0",
-]
+dev = ["pytest>=8.4.2", "pytest-timeout>=2.4.0"]
