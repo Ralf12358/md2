@@ -328,7 +328,7 @@ def md2pdf(
     self_contained: bool = True,  # Default True: embeds MathJax + resources for offline use
     page_numbers: bool = True,
 ) -> List[Path]:
-    # Generate HTML with TOC placeholders if page numbers are enabled
+    # Generate clean HTML first (without TOC placeholders)
     html_paths = md2html(
         input_paths=input_paths,
         css=css,
@@ -340,10 +340,10 @@ def md2pdf(
         runtime=runtime,
         ensure=ensure,
         self_contained=self_contained,
-        add_toc_placeholders=page_numbers,  # Add placeholders if page numbers enabled
+        add_toc_placeholders=False,  # Keep HTML clean
     )
 
-    # Convert HTML to PDF (container handles all PDF processing)
+    # Convert HTML to PDF (container handles all PDF processing including temp files)
     pdf_paths = html2pdf(
         html_paths,
         runtime=runtime,

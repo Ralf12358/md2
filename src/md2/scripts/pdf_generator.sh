@@ -13,20 +13,35 @@ if [[ ! -f "$INPUT_HTML" ]]; then
     exit 1
 fi
 
+# If page numbers are enabled, create a temporary HTML copy with TOC placeholders
+WORKING_HTML="$INPUT_HTML"
+if [[ "$PAGE_NUMBERS" == "true" ]]; then
+    TEMP_HTML="/tmp/temp_pdf_$(basename "$INPUT_HTML")"
+    echo "Creating temporary HTML with TOC placeholders: $TEMP_HTML"
+    cp "$INPUT_HTML" "$TEMP_HTML"
+
+    # Add TOC placeholders to the temporary copy
+    python3 /scripts/html_postprocess.py "$TEMP_HTML" true
+    WORKING_HTML="$TEMP_HTML"
+fi
+
 # Create temporary PDF for processing
 TEMP_PDF="/tmp/temp_$(basename "$OUTPUT_PDF")"
 
-echo "Converting HTML to PDF: $INPUT_HTML -> $TEMP_PDF"
+echo "Converting HTML to PDF: $WORKING_HTML -> $TEMP_PDF"
 
 # Convert HTML to PDF using print.js
-node /app/print.js "$INPUT_HTML" "$TEMP_PDF" --pageNumbers="$PAGE_NUMBERS"
+node /app/print.js "$WORKING_HTML" "$TEMP_PDF" --pageNumbers="$PAGE_NUMBERS"
 
 echo "Processing PDF for page numbers: $PAGE_NUMBERS"
 
 # Process PDF for page numbers (if enabled) and move to final location
 python3 /scripts/pdf_processor.py "$TEMP_PDF" "$OUTPUT_PDF" "$PAGE_NUMBERS"
 
-# Clean up temporary file
+# Clean up temporary files
 rm -f "$TEMP_PDF"
+if [[ "$PAGE_NUMBERS" == "true" && -f "$TEMP_HTML" ]]; then
+    rm -f "$TEMP_HTML"
+fi
 
 echo "PDF generation complete: $OUTPUT_PDF"
