@@ -397,75 +397,49 @@ def md2docx(
         # Determine the actual title to use
         actual_title = determine_document_title(abs_in, title)
 
-        # Handle multiple H1s by shifting headings and adding title
-        h1_count = count_h1_headers(abs_in)
-        temp_file = None
-        if h1_count > 1:
-            # Create temporary file with shifted headings in container
-            modified_content = shift_headings_and_add_title(abs_in, actual_title)
-            import uuid
-
-            temp_name = f"tmp_{uuid.uuid4().hex[:8]}.md"
-            temp_file = in_dir / temp_name
-            temp_file.write_text(modified_content, encoding="utf-8")
-
-            # Use the temporary file for conversion
-            container_in = f"/work/{temp_name}"
-        else:
-            container_in = f"/work/{abs_in.name}"
-
+        container_in = f"/work/{abs_in.name}"
         container_out = f"/work/{out_abs.name}"
 
         cmd = [runtime, "run", "--rm"]
         cmd += rt.get_user_args(runtime)
+        cmd += rt.get_security_args(runtime)
+
         mounts = [
             "-v",
             f"{in_dir}:/work",
             "-v",
-            f"{_styles_dir()}:/styles:ro",
+            f"{rt.PROJECT_ROOT}/styles:/styles:ro",
             "-v",
             f"{rt.PROJECT_ROOT}/filters:/filters:ro",
+            "-v",
+            f"{rt.PROJECT_ROOT}/scripts:/scripts:ro",
         ]
+
         if reference_doc:
             ref_abs = Path(reference_doc).resolve()
             mounts += ["-v", f"{ref_abs.parent}:/ref:ro"]
+            cmd += ["-e", f"REFERENCE_DOC=/ref/{ref_abs.name}"]
+
         cmd += mounts
+
         if os.environ.get("DOCX_SVG") is not None:
             cmd += ["-e", f"DOCX_SVG={os.environ['DOCX_SVG']}"]
+
         cmd.append(rt.IMAGE_NAME)
 
-        if dialect == "github":
-            input_format = "gfm+tex_math_dollars+emoji+footnotes+task_lists+strikeout"
-        elif dialect == "commonmark":
-            input_format = "commonmark_x+tex_math_dollars+tex_math_single_backslash+smart+emoji+footnotes+definition_lists+fenced_code_attributes+link_attributes+task_lists+strikeout+pipe_tables+table_captions"
-        else:
-            input_format = "markdown+tex_math_dollars+tex_math_single_backslash+smart+emoji+footnotes+definition_lists+fenced_code_attributes+link_attributes+task_lists+strikeout+pipe_tables+table_captions+auto_identifiers+implicit_header_references"
-
+        # Use container script to handle all processing
         inner = [
-            "pandoc",
-            "-f",
-            input_format,
-            "-t",
-            "docx",
-            "--standalone",
-            "--resource-path=/work:/styles:/tmp",
-            "--lua-filter=/filters/mermaid.lua",
+            "bash",
+            "/scripts/md2docx.sh",
+            container_in,
+            container_out,
+            actual_title,
+            dialect,
         ]
-        inner += list(markdown_flags or [])
-
-        # Set document title
-        inner += ["--metadata=title:" + actual_title]
-
-        inner += [container_in, "-o", container_out]
-        if reference_doc:
-            inner += ["--reference-doc=/ref/" + Path(reference_doc).resolve().name]
+        inner.extend(markdown_flags)
 
         cmd += inner
         subprocess.run(cmd, check=True)
-
-        # Clean up temporary file if created
-        if temp_file and temp_file.exists():
-            temp_file.unlink()
 
         results.append(out_abs)
 
