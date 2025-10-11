@@ -52,6 +52,15 @@ if [[ "$H1_COUNT" -gt 1 ]]; then
     WORKING_MD="$TEMP_MD"
 fi
 
+# Always run generic preprocessing before conversion (ensures blank line before lists)
+PRE_MD="/tmp/pre_$(basename "$WORKING_MD")"
+if [[ -f /scripts/preprocess_md.py ]]; then
+    python3 /scripts/preprocess_md.py "$WORKING_MD" "$PRE_MD" || cp -f "$WORKING_MD" "$PRE_MD"
+else
+    cp -f "$WORKING_MD" "$PRE_MD"
+fi
+WORKING_MD="$PRE_MD"
+
 # Set input format based on dialect
 case "$DIALECT" in
     "github")
@@ -98,5 +107,8 @@ echo "Converting markdown to DOCX: $WORKING_MD -> $OUTPUT_DOCX"
 if [[ "$H1_COUNT" -gt 1 && -f "$TEMP_MD" ]]; then
     rm -f "$TEMP_MD"
 fi
+
+# Clean preprocessed temp file
+rm -f "$PRE_MD" || true
 
 echo "DOCX generation complete: $OUTPUT_DOCX"

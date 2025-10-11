@@ -83,6 +83,14 @@ export PUPPETEER_ARGS="--no-sandbox --disable-setuid-sandbox --disable-dev-shm-u
 # - High-quality mathematical typography
 # DO NOT change to generic --mathjax flag - it breaks visual rendering
 MATHJAX_URL="/mathjax/tex-svg-full.js"
+# Preprocess markdown inside container (write to /tmp and use as input for pandoc)
+PRE_MD="/tmp/pre_$(basename "$IN")"
+if [[ -f /scripts/preprocess_md.py ]]; then
+  python3 /scripts/preprocess_md.py "$IN" "$PRE_MD" || cp -f "$IN" "$PRE_MD"
+else
+  cp -f "$IN" "$PRE_MD"
+fi
+
 OPTS=(
   -f "$INPUT_FORMAT"
   -t html5
@@ -127,7 +135,7 @@ FILTERS=()
 if command -v mermaid >/dev/null 2>&1; then
   FILTERS+=(--lua-filter=/filters/mermaid.lua)
 fi
-pandoc "${OPTS[@]}" ${FILTERS[@]} "$IN" -o "$OUT"
+pandoc "${OPTS[@]}" ${FILTERS[@]} "$PRE_MD" -o "$OUT"
 
 
 # When linking CSS, also make MathJax available next to the HTML so the file:// URL works reliably.

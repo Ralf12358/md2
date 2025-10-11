@@ -436,6 +436,9 @@ def md2docx(
             actual_title,
             dialect,
         ]
+        # Pass reference doc as explicit pandoc flag so it is visible in the command list/tests
+        if reference_doc:
+            inner.append(f"--reference-doc=/ref/{ref_abs.name}")
         inner.extend(markdown_flags)
 
         cmd += inner
