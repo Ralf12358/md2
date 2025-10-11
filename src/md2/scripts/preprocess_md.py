@@ -93,7 +93,9 @@ def preprocess_lines(lines: List[str]) -> List[str]:
                 # 1. Standalone (no trailing text) - with or without colon
                 # 2. NOT a label-value pair (colon + trailing text = skip)
                 is_short_heading = len(heading_text) <= 100
-                looks_like_heading = is_standalone  # Must be standalone, colon is optional
+                looks_like_heading = (
+                    is_standalone  # Must be standalone, colon is optional
+                )
 
                 if is_short_heading and looks_like_heading:
                     # Check if next non-blank line exists

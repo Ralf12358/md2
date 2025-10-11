@@ -20,7 +20,7 @@ INTERNAL_RESOURCES="${INTERNAL_RESOURCES:-0}"
 # Parse additional arguments for format and HTML options
 # Default to a rich Pandoc Markdown with helpful extensions for best results
 # Users can override with --github or --commonmark flags
-INPUT_FORMAT="markdown+tex_math_dollars+tex_math_single_backslash+smart+emoji+footnotes+definition_lists+fenced_code_attributes+link_attributes+task_lists+strikeout+pipe_tables+table_captions+auto_identifiers+implicit_header_references"
+INPUT_FORMAT="markdown+tex_math_dollars+tex_math_single_backslash+smart+emoji+footnotes+definition_lists+fenced_code_attributes+link_attributes+task_lists+strikeout+pipe_tables+table_captions+auto_identifiers+implicit_header_references+hard_line_breaks"
 EXTRA_CSS_LINKS=()
 HTML_TITLE=""
 DOC_TITLE=""
@@ -40,11 +40,11 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --commonmark)
       # CommonMark-X: avoid extensions not supported (e.g., auto_identifiers)
-  INPUT_FORMAT="commonmark_x+tex_math_dollars+tex_math_single_backslash+smart+emoji+footnotes+definition_lists+fenced_code_attributes+link_attributes+task_lists+strikeout+pipe_tables+table_captions"
+  INPUT_FORMAT="commonmark_x+tex_math_dollars+tex_math_single_backslash+smart+emoji+footnotes+definition_lists+fenced_code_attributes+link_attributes+task_lists+strikeout+pipe_tables+table_captions+hard_line_breaks"
       ;;
     --github)
       # Limit to GFM-supported set; avoid unsupported extensions like auto_identifiers
-  INPUT_FORMAT="gfm+tex_math_dollars+tex_math_single_backslash+emoji+footnotes+task_lists+strikeout"
+  INPUT_FORMAT="gfm+tex_math_dollars+tex_math_single_backslash+emoji+footnotes+task_lists+strikeout+hard_line_breaks"
       ;;
     --html-title=*)
       HTML_TITLE="${1#--html-title=}"

@@ -64,13 +64,13 @@ WORKING_MD="$PRE_MD"
 # Set input format based on dialect
 case "$DIALECT" in
     "github")
-        INPUT_FORMAT="gfm+tex_math_dollars+emoji+footnotes+task_lists+strikeout"
+        INPUT_FORMAT="gfm+tex_math_dollars+emoji+footnotes+task_lists+strikeout+hard_line_breaks"
         ;;
     "commonmark")
-        INPUT_FORMAT="commonmark_x+tex_math_dollars+tex_math_single_backslash+smart+emoji+footnotes+definition_lists+fenced_code_attributes+link_attributes+task_lists+strikeout+pipe_tables+table_captions"
+        INPUT_FORMAT="commonmark_x+tex_math_dollars+tex_math_single_backslash+smart+emoji+footnotes+definition_lists+fenced_code_attributes+link_attributes+task_lists+strikeout+pipe_tables+table_captions+hard_line_breaks"
         ;;
     *)
-        INPUT_FORMAT="markdown+tex_math_dollars+tex_math_single_backslash+smart+emoji+footnotes+definition_lists+fenced_code_attributes+link_attributes+task_lists+strikeout+pipe_tables+table_captions+auto_identifiers+implicit_header_references"
+        INPUT_FORMAT="markdown+tex_math_dollars+tex_math_single_backslash+smart+emoji+footnotes+definition_lists+fenced_code_attributes+link_attributes+task_lists+strikeout+pipe_tables+table_captions+auto_identifiers+implicit_header_references+hard_line_breaks"
         ;;
 esac
 
