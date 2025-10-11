@@ -972,6 +972,12 @@ nav#TOC>ul>li>ul>li>ul>li::before,
         break-after: avoid-page;
         page-break-after: avoid;
     }
+
+    /* Pseudo-headings: short paragraphs starting with bold text followed by content */
+    p:has(> strong:first-child):has(+ :is(p, ul, ol, pre, table, figure)) {
+        break-after: avoid-page;
+        page-break-after: avoid;
+    }
 }
 
 /* Print: top-priority rule — never break at headings */
