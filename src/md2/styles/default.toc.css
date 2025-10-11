@@ -470,7 +470,7 @@ hr {
     p {
         widows: 3;
         orphans: 3;
-        margin: var(--print-block-spacing) 0;
+        margin: 0.85em 0;
     }
 
     /* Prefer smart breaks instead of always forcing new pages */
