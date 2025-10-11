@@ -1027,6 +1027,19 @@ nav#TOC>ul>li>ul>li>ul>li::before,
         page-break-inside: avoid;
     }
 
+    /* Horizontal rules as page break hints:
+       - Make hr invisible in PDF
+       - Force page break after hr */
+    hr {
+        visibility: hidden;
+        height: 0;
+        margin: 0;
+        padding: 0;
+        border: none;
+        break-after: page;
+        page-break-after: always;
+    }
+
     /* Adjacent headings across Pandoc section wrappers (print) */
     h1+section.level2>h2:first-child,
     h2+section.level3>h3:first-child,

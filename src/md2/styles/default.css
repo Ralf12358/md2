@@ -882,6 +882,19 @@ hr {
         break-inside: avoid-page;
         page-break-inside: avoid;
     }
+
+    /* Horizontal rules as page break hints:
+       - Make hr invisible in PDF
+       - Force page break after hr */
+    hr {
+        visibility: hidden;
+        height: 0;
+        margin: 0;
+        padding: 0;
+        border: none;
+        break-after: page;
+        page-break-after: always;
+    }
 }
 
 /* TOC list splitting rules live in default.toc.css */
