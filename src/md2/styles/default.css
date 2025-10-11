@@ -822,7 +822,14 @@ hr {
     h3+p:has(+ :is(table, figure, pre, ul, ol, .math.display, .katex-display, .mjx-container[display="true"])),
     h4+p:has(+ :is(table, figure, pre, ul, ol, .math.display, .katex-display, .mjx-container[display="true"])),
     h5+p:has(+ :is(table, figure, pre, ul, ol, .math.display, .katex-display, .mjx-container[display="true"])),
-    h6+p:has(+ :is(table, figure, pre, ul, ol, .math.display, .katex-display, .mjx-container[display="true"])) {
+    h6+p:has(+ :is(table, figure, pre, ul, ol, .math.display, .katex-display, .mjx-container[display="true"])),
+    p:has(+ :is(table, figure, pre, ul, ol)):is([data-ends-with-colon], :has(+ :is(table, figure, pre, ul, ol))) {
+        break-after: avoid-page;
+        page-break-after: avoid;
+    }
+
+    /* Paragraphs ending with colon followed by code/table/list (introductory text pattern) */
+    p:has(+ :is(pre, table, figure, ul, ol)) {
         break-after: avoid-page;
         page-break-after: avoid;
     }
