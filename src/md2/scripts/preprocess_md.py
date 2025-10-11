@@ -83,15 +83,17 @@ def preprocess_lines(lines: List[str]) -> List[str]:
                 trailing_text = pseudo_match.group(2).strip()
 
                 # Check if this looks like a heading:
-                # - Has colon suffix (e.g., **Performance Concerns:**)
-                # - OR is standalone with no trailing text
+                # - Standalone with optional colon: **Performance Concerns:** or **Performance Concerns**
+                # - NOT a label-value pair: **Effort:** some text (trailing text present)
                 has_colon = heading_text_raw.endswith(":")
                 heading_text = heading_text_raw.rstrip(":").strip()
                 is_standalone = trailing_text == ""
 
-                # Only convert if short enough AND (has colon OR is standalone)
+                # Only convert if:
+                # 1. Standalone (no trailing text) - with or without colon
+                # 2. NOT a label-value pair (colon + trailing text = skip)
                 is_short_heading = len(heading_text) <= 100
-                looks_like_heading = has_colon or is_standalone
+                looks_like_heading = is_standalone  # Must be standalone, colon is optional
 
                 if is_short_heading and looks_like_heading:
                     # Check if next non-blank line exists
@@ -104,7 +106,7 @@ def preprocess_lines(lines: List[str]) -> List[str]:
 
                     has_following_content = next_content_idx < len(lines)
 
-                    if has_following_content or trailing_text:
+                    if has_following_content:
                         # Convert to heading: use current level + 1, max at h6
                         new_level = min(current_heading_level + 1, 6)
                         if new_level == 0:  # No previous headings, default to h5
