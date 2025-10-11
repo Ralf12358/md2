@@ -838,6 +838,27 @@ hr {
         page-break-after: avoid;
     }
 
+    /* Lenient version: paragraph followed by code/table (even with empty elements between)
+       Uses ~ (general sibling) instead of + (adjacent sibling) */
+    p:has(~ pre),
+    p:has(~ table),
+    p:has(~ figure) {
+        break-after: avoid-page;
+        page-break-after: avoid;
+    }
+
+    /* Specifically target paragraphs containing bold/strong text followed by code/table
+       This catches patterns like "**Phase 2:** description" followed by code block */
+    p:has(strong):has(+ pre),
+    p:has(strong):has(+ table),
+    p:has(strong):has(+ figure),
+    p:has(strong):has(~ pre),
+    p:has(strong):has(~ table),
+    p:has(strong):has(~ figure) {
+        break-after: avoid-page;
+        page-break-after: avoid;
+    }
+
     /* Also prevent breaks before these blocks to reinforce the rule */
     pre,
     table,
