@@ -973,10 +973,23 @@ nav#TOC>ul>li>ul>li>ul>li::before,
         page-break-after: avoid;
     }
 
-    /* Paragraphs ending with colon followed by code/table/list (introductory text pattern) */
-    p:has(+ :is(pre, table, figure, ul, ol)) {
+    /* ANY paragraph immediately before code/table/list (introductory text pattern)
+       This catches patterns like "Create performance comparison script:" followed by code block */
+    p:has(+ pre),
+    p:has(+ table),
+    p:has(+ figure),
+    p:has(+ ul),
+    p:has(+ ol) {
         break-after: avoid-page;
         page-break-after: avoid;
+    }
+
+    /* Also prevent breaks before these blocks to reinforce the rule */
+    pre,
+    table,
+    figure {
+        break-before: avoid-page;
+        page-break-before: avoid;
     }
 }
 
