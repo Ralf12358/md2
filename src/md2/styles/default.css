@@ -572,6 +572,18 @@ hr {
         margin: var(--print-block-spacing) 0 var(--print-block-spacing) 1.4em;
     }
 
+    /* Add spacing between list items in print */
+    li {
+        margin-top: 0.35em;
+        margin-bottom: 0.35em;
+    }
+
+    /* Nested lists: reduce top margin */
+    li>ul,
+    li>ol {
+        margin-top: 0.25em;
+    }
+
     table {
         font-size: calc(var(--print-table-font-scale) * 1em);
     }
