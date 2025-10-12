@@ -1093,7 +1093,13 @@ nav#TOC>ul>li>ul>li>ul>li::before,
     h3,
     h4,
     h5,
-    h6 {
+    h6,
+    section.level1,
+    section.level2,
+    section.level3,
+    section.level4,
+    section.level5,
+    section.level6 {
         break-inside: avoid-page;
         page-break-inside: avoid;
     }
@@ -1112,11 +1118,11 @@ nav#TOC>ul>li>ul>li>ul>li::before,
     }
 
     /* Adjacent headings across Pandoc section wrappers (print) */
-    h1+section.level2>h2:first-child,
-    h2+section.level3>h3:first-child,
-    h3+section.level4>h4:first-child,
-    h4+section.level5>h5:first-child,
-    h5+section.level6>h6:first-child {
+    section.level2>h2:first-child,
+    section.level3>h3:first-child,
+    section.level4>h4:first-child,
+    section.level5>h5:first-child,
+    section.level6>h6:first-child {
         margin-top: 0;
     }
 
