@@ -279,6 +279,44 @@ svg.mermaid-svg {
     margin-right: auto;
 }
 
+/* Mermaid multi-column layouts */
+.mermaid-grid {
+    display: grid;
+    gap: 1.5em;
+    margin: 1.5em 0;
+}
+
+.mermaid-grid-2 {
+    grid-template-columns: repeat(auto-fit, minmax(45%, 1fr));
+}
+
+.mermaid-grid-3 {
+    grid-template-columns: repeat(auto-fit, minmax(30%, 1fr));
+}
+
+.mermaid-grid-4 {
+    grid-template-columns: repeat(auto-fit, minmax(22%, 1fr));
+}
+
+@media print {
+    .mermaid-grid {
+        gap: 1em;
+        margin: 1em 0;
+    }
+    
+    .mermaid-grid-2 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .mermaid-grid-3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .mermaid-grid-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
 /* List items containing inline math: add breathing room between bullets */
 li:has(.katex:not(.katex-display)),
 li:has(.mjx-container:not([display="true"])),

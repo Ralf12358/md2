@@ -18,8 +18,9 @@ local function url_encode(data)
   return table.concat(result)
 end
 
-local function mermaid_image(code, ext)
+local function mermaid_image(code, ext, scale)
   ext = ext or '.svg'
+  scale = scale or '6'
   local hash = sha1(code)
   local base = '/tmp/mermaid-' .. hash
   local infile = base .. '.mmd'
@@ -28,7 +29,7 @@ local function mermaid_image(code, ext)
   f:write(code)
   f:close()
   local ok, err = pcall(function()
-    pandoc.pipe('mermaid', {'-i', infile, '-o', outfile, '-b', 'transparent', '-s', '4'}, '')
+    pandoc.pipe('mermaid', {'-i', infile, '-o', outfile, '-b', 'transparent', '-s', scale}, '')
   end)
   os.remove(infile)
   if not ok then
@@ -63,18 +64,30 @@ local function tune_svg(svg, opts)
       nums[#nums+1] = tonumber(n)
     end
     local vbw = nums[3] or 0
+    local vbh = nums[4] or 0
     if vbw > 0 and (not opts.width_percent) then
-      if vbw < 500 then
+      -- Auto-adjust based on viewBox dimensions
+      local aspect = vbw / (vbh > 0 and vbh or vbw)
+      if aspect > 2.5 then
+        -- Very wide diagram: use full width
+        width_percent = 100
+      elseif aspect > 1.8 then
+        -- Wide diagram
+        width_percent = 100
+      elseif vbw < 300 then
+        -- Narrow diagram
         width_percent = 60
-      elseif vbw < 900 then
+      elseif vbw < 500 then
+        -- Medium diagram
         width_percent = 80
       else
+        -- Large diagram
         width_percent = 100
       end
     end
   elseif not opts.width_percent then
     -- No viewBox: pick a safe default
-    width_percent = 80
+    width_percent = 90
   end
 
   -- Build new style string
@@ -152,7 +165,18 @@ function CodeBlock(el)
   local fmt = (FORMAT or '')
   local is_docx = fmt:match('docx') ~= nil
   local force_svg = os.getenv('DOCX_SVG') == '1' or el.attributes['svg'] == '1'
-  local out, err = mermaid_image(el.text, (is_docx and not force_svg) and '.png' or '.svg')
+  
+  -- Auto-detect scale based on diagram complexity
+  local scale = el.attributes['scale'] or '6'
+  local line_count = 0
+  for _ in el.text:gmatch('\n') do line_count = line_count + 1 end
+  if line_count > 50 and el.attributes['scale'] == nil then
+    scale = '5'  -- Reduce scale slightly for very complex diagrams
+  elseif line_count > 30 and el.attributes['scale'] == nil then
+    scale = '5.5'
+  end
+  
+  local out, err = mermaid_image(el.text, (is_docx and not force_svg) and '.png' or '.svg', scale)
   if not out then
     io.stderr:write('[mermaid] generation failed: ' .. err .. '\n')
     return nil
