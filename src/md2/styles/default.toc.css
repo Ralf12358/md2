@@ -41,31 +41,31 @@
     /* Math formula scaling */
 
     /* SCREEN heading spacing (top/bottom) */
-    --h1-mt: 1.05em;
+    --h1-mt: 1.1em;
     --h1-mb: 0.5em;
     --h2-mt: 2.25em;
     --h2-mb: 0.5em;
-    --h3-mt: 1.8em;
+    --h3-mt: 2.0em;
     --h3-mb: 0.5em;
-    --h4-mt: 1.5em;
+    --h4-mt: 1.75em;
     --h4-mb: 0.5em;
-    --h5-mt: 1.3em;
+    --h5-mt: 1.5em;
     --h5-mb: 0.5em;
-    --h6-mt: 1.2em;
+    --h6-mt: 1.25em;
     --h6-mb: 0.5em;
 
     /* PRINT heading spacing (top/bottom) */
-    --print-h1-mt: 0.9em;
+    --print-h1-mt: 1.9em;
     --print-h1-mb: 0.45em;
-    --print-h2-mt: calc(0.9em + 1em);
+    --print-h2-mt: 2.0em;
     --print-h2-mb: 0.45em;
-    --print-h3-mt: calc(0.9em + 0.8em);
+    --print-h3-mt: 1.75em;
     --print-h3-mb: 0.45em;
-    --print-h4-mt: 0.9em;
+    --print-h4-mt: 1.5em;
     --print-h4-mb: 0.45em;
-    --print-h5-mt: 0.9em;
+    --print-h5-mt: 1.25em;
     --print-h5-mb: 0.45em;
-    --print-h6-mt: 0.9em;
+    --print-h6-mt: 1em;
     --print-h6-mb: 0.45em;
 }
 
@@ -335,6 +335,8 @@ li:has(.math.inline) {
 }
 
 /* Do not alter display math spacing */
+/* NOTE: line-height here does NOT control spacing between lines WITHIN a formula */
+/* That is controlled by MathJax/KaTeX rendering options, not CSS */
 .katex-display,
 .katex-display .katex {
     line-height: normal !important;
@@ -450,7 +452,7 @@ hr {
 /* Math block spacing */
 .math.display {
     display: block;
-    margin: 1em 0;
+    margin: 1.25em 0;
 }
 
 /* Print adjustments */
@@ -567,6 +569,11 @@ hr {
 
     :root {
         --math-scale: var(--print-math-scale);
+    }
+
+    /* CONTROL LINE SPACING BETWEEN FORMULA LINES IN PRINT */
+    .math.display {
+        margin: 1.25em 0;
     }
 
     /* Keep common block elements intact on a page when possible */
