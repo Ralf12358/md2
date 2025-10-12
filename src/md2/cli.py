@@ -463,10 +463,7 @@ def main_md2docx(argv: Optional[List[str]] = None) -> None:
 
 
 def usage_md2rebuild() -> None:
-    print(
-        "Usage: md2rebuild\n\nForce rebuild of the Docker/Podman container image (ignoring cache).",
-        file=sys.stderr,
-    )
+    print("Usage: md2rebuild\n\nForce rebuild of the Docker/Podman container image (ignoring cache).", file=sys.stderr)
     sys.exit(1)
 
 
