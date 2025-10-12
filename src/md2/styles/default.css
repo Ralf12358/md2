@@ -496,7 +496,6 @@ hr {
         page-break-after: avoid;
     }
 
-    /* Print heading sizing and spacing */
     h1 {
         font-size: calc(var(--print-heading-scale-h1) * 1rem);
         margin: var(--print-h1-mt) 0 var(--print-h1-mb);
@@ -754,10 +753,9 @@ hr {
 
     /*
      * Smart keep-with-next for headings:
-     * - Keep a heading together with the first following block.
-     * - If the first block cannot fit, move the heading to the next page
-     *   instead of leaving it orphaned at the bottom.
-     * - Exclude first H1 to avoid title page split
+     * - Headings use break-after:avoid (defined earlier)
+     * - First block after heading should not break internally
+     * - Do NOT use break-before:avoid as it forces headings to new pages
      */
     h1:not(:first-of-type)+*,
     h2+*,
@@ -765,8 +763,6 @@ hr {
     h4+*,
     h5+*,
     h6+* {
-        break-before: avoid-page;
-        page-break-before: avoid;
         break-inside: avoid-page;
         page-break-inside: avoid;
     }
@@ -843,9 +839,25 @@ hr {
     h3+ol,
     h4+ol,
     h5+ol,
-    h6+ol {
-        break-before: avoid-page;
-        page-break-before: avoid;
+    h6+ol,
+    h1:not(:first-of-type)+p+pre,
+    h2+p+pre,
+    h3+p+pre,
+    h4+p+pre,
+    h5+p+pre,
+    h6+p+pre,
+    h1:not(:first-of-type)+p+table,
+    h2+p+table,
+    h3+p+table,
+    h4+p+table,
+    h5+p+table,
+    h6+p+table,
+    h1:not(:first-of-type)+p+p+pre,
+    h2+p+p+pre,
+    h3+p+p+pre,
+    h4+p+p+pre,
+    h5+p+p+pre,
+    h6+p+p+pre {
         break-inside: avoid-page;
         page-break-inside: avoid;
     }
@@ -859,8 +871,8 @@ hr {
     h4+p:has(+ :is(table, figure, pre, ul, ol, svg, img, canvas, .mermaid-svg, .math.display, .katex-display, .mjx-container[display="true"])),
     h5+p:has(+ :is(table, figure, pre, ul, ol, svg, img, canvas, .mermaid-svg, .math.display, .katex-display, .mjx-container[display="true"])),
     h6+p:has(+ :is(table, figure, pre, ul, ol, svg, img, canvas, .mermaid-svg, .math.display, .katex-display, .mjx-container[display="true"])) {
-        break-after: avoid-page;
-        page-break-after: avoid;
+        break-inside: avoid-page;
+        page-break-inside: avoid;
     }
 
     /* ANY paragraph immediately before code/table/list (introductory text pattern)
@@ -874,8 +886,8 @@ hr {
     p:has(+ img),
     p:has(+ canvas),
     p:has(+ .mermaid-svg) {
-        break-after: avoid-page;
-        page-break-after: avoid;
+        break-inside: avoid-page;
+        page-break-inside: avoid;
     }
 
     /* Lenient version: paragraph followed by code/table (even with empty elements between)
@@ -887,8 +899,8 @@ hr {
     p:has(~ img),
     p:has(~ canvas),
     p:has(~ .mermaid-svg) {
-        break-after: avoid-page;
-        page-break-after: avoid;
+        break-inside: avoid-page;
+        page-break-inside: avoid;
     }
 
     /* Specifically target paragraphs containing bold/strong text followed by code/table
@@ -907,26 +919,13 @@ hr {
     p:has(strong):has(~ img),
     p:has(strong):has(~ canvas),
     p:has(strong):has(~ .mermaid-svg) {
-        break-after: avoid-page;
-        page-break-after: avoid;
-    }
-
-    /* Also prevent breaks before these blocks to reinforce the rule */
-    pre,
-    table,
-    figure,
-    svg,
-    img,
-    canvas,
-    .mermaid-svg {
-        break-before: avoid-page;
-        page-break-before: avoid;
+        break-inside: avoid-page;
+        page-break-inside: avoid;
     }
 }
 
 /* Print: top-priority rule — never break at headings */
 @media print {
-
     h1,
     h2,
     h3,
