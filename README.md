@@ -92,6 +92,17 @@ html2pdf doc.html other.html
 html2pdf --no-page-numbers doc.html  # Disable page numbers (enabled by default)
 ```
 
+### md2rebuild
+```sh
+md2rebuild  # Force rebuild of container image (ignoring cache)
+```
+
+Forces a complete rebuild of the Docker/Podman container image, ignoring any cached layers. This is useful when:
+- You've modified the Dockerfile
+- You need to pull updated base images
+- You're troubleshooting container-related issues
+- You want to ensure a clean build from scratch
+
 ### Available Options
 
 Both `md2html`, `md2pdf`, and `md2docx` support extensive Markdown processing options:
@@ -476,7 +487,8 @@ md2docx --no-toc examples/doc.md
 - **Missing runtime**: Install either Docker or Podman (or both). md2 will automatically detect and use the available runtime.
 - **Runtime selection**: Use `RUNTIME=docker` or `RUNTIME=podman` environment variable to force a specific container runtime.
 - **Podman rootless networking**: This tool uses `--network=slirp4netns` to avoid pasta/TUN requirements. If networking fails, ensure `slirp4netns` is available in your Podman setup.
-- **Build failures**: Remove container image `md2:latest` and retry: `podman rmi md2:latest` or `docker rmi md2:latest`.
+- **Build failures**: Remove container image `md2:latest` and retry: `podman rmi md2:latest` or `docker rmi md2:latest`. Alternatively, use `md2rebuild` to force a clean rebuild with `--no-cache`.
+- **Container image issues**: Run `md2rebuild` to force a complete rebuild of the container image, ignoring all cached layers.
 - **Styling not applied**: Ensure you didn't pass invalid flags; verify the generated HTML has either a `<style>` block (self-contained) or a `<link rel="stylesheet" href="default.css">` next to the file. When using `--css`, confirm the file exists and is mounted.
 
 ## License

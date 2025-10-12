@@ -1,6 +1,6 @@
 [project]
 name = "md2"
-version = "0.8.4"
+version = "0.9.0"
 description = "Markdown -> HTML -> PDF via Podman/Docker (pandoc+mermaid+mathjax+puppeteer)"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -13,6 +13,7 @@ md2html = "md2.cli:main_md2html"
 md2pdf = "md2.cli:main_md2pdf"
 html2pdf = "md2.cli:main_html2pdf"
 md2docx = "md2.cli:main_md2docx"
+md2rebuild = "md2.cli:main_md2rebuild"
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]

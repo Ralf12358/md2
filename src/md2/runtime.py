@@ -62,3 +62,12 @@ def ensure_image(runtime: str, root: Path | None = None) -> None:
         check=True,
         cwd=str(context),
     )
+
+
+def rebuild_image(runtime: str, root: Path | None = None) -> None:
+    context = PROJECT_ROOT if root is None else root
+    subprocess.run(
+        [runtime, "build", "--no-cache", "-t", IMAGE_NAME, "-f", "Dockerfile", str(context)],
+        check=True,
+        cwd=str(context),
+    )

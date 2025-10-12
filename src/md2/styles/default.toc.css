@@ -1070,6 +1070,12 @@ nav#TOC>ul>li>ul>li>ul>li::before,
     }
 
     /* Keep sections with diagrams together - prevents heading orphaning */
+    section.level6:has(> svg),
+    section.level6:has(> .mermaid-svg),
+    section.level5:has(> svg),
+    section.level5:has(> .mermaid-svg),
+    section.level4:has(> svg),
+    section.level4:has(> .mermaid-svg),
     section.level3:has(> svg),
     section.level3:has(> .mermaid-svg),
     section.level2:has(> svg),

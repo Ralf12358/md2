@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 from .conversion import md2html, md2pdf, html2pdf, md2docx
+from . import runtime as rt
 
 
 def usage_md2html() -> None:
@@ -459,3 +460,25 @@ def main_md2docx(argv: Optional[List[str]] = None) -> None:
         title=title,
         reference_doc=reference_doc,
     )
+
+
+def usage_md2rebuild() -> None:
+    print("Usage: md2rebuild\n\nForce rebuild of the Docker/Podman container image (ignoring cache).", file=sys.stderr)
+    sys.exit(1)
+
+
+def main_md2rebuild(argv: Optional[List[str]] = None) -> None:
+    if argv is None:
+        argv = sys.argv[1:]
+
+    if argv and argv[0] in ["-h", "--help"]:
+        usage_md2rebuild()
+
+    if argv:
+        print(f"Unknown option: {argv[0]}", file=sys.stderr)
+        usage_md2rebuild()
+
+    runtime = rt.get_container_runtime()
+    print(f"Rebuilding container image using {runtime}...")
+    rt.rebuild_image(runtime, rt.PROJECT_ROOT)
+    print("Container image rebuild complete.")
