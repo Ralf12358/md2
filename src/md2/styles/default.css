@@ -303,15 +303,15 @@ svg.mermaid-svg {
         gap: 1em;
         margin: 1em 0;
     }
-    
+
     .mermaid-grid-2 {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .mermaid-grid-3 {
         grid-template-columns: repeat(3, 1fr);
     }
-    
+
     .mermaid-grid-4 {
         grid-template-columns: repeat(4, 1fr);
     }

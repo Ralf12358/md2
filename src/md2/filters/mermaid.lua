@@ -165,7 +165,7 @@ function CodeBlock(el)
   local fmt = (FORMAT or '')
   local is_docx = fmt:match('docx') ~= nil
   local force_svg = os.getenv('DOCX_SVG') == '1' or el.attributes['svg'] == '1'
-  
+
   -- Auto-detect scale based on diagram complexity
   local scale = el.attributes['scale'] or '6'
   local line_count = 0
@@ -175,7 +175,7 @@ function CodeBlock(el)
   elseif line_count > 30 and el.attributes['scale'] == nil then
     scale = '5.5'
   end
-  
+
   local out, err = mermaid_image(el.text, (is_docx and not force_svg) and '.png' or '.svg', scale)
   if not out then
     io.stderr:write('[mermaid] generation failed: ' .. err .. '\n')
