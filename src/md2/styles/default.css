@@ -922,6 +922,15 @@ hr {
         break-before: avoid-page;
         page-break-before: avoid;
     }
+
+    /* Keep sections with diagrams together - prevents heading orphaning */
+    section.level3:has(> svg),
+    section.level3:has(> .mermaid-svg),
+    section.level2:has(> svg),
+    section.level2:has(> .mermaid-svg) {
+        break-inside: avoid-page;
+        page-break-inside: avoid;
+    }
 }
 
 /* Print: top-priority rule — never break at headings */
