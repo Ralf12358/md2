@@ -27,7 +27,7 @@ md2rebuild
 
 - `src/md2/runtime.py`: Added `rebuild_image()` function
 - `src/md2/cli.py`: Added `main_md2rebuild()` and `usage_md2rebuild()` functions
-- `pyproject.toml`: 
+- `pyproject.toml`:
   - Added `md2rebuild` to `[project.scripts]`
   - Version bumped from 0.8.4 to 0.9.0
 - `README.md`: Added documentation for `md2rebuild` command
