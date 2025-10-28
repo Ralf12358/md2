@@ -692,7 +692,7 @@ hr {
     }
 
     tfoot {
-        display: table-footer-group;    
+        display: table-footer-group;
     }
 
     /* Ensure adjacent tables have a visible gap in print */
@@ -1010,5 +1010,4 @@ hr {
             page-break-after: always;
         }
     }
-
-    /* TOC list splitting rules live in default.toc.css */
+}
