@@ -20,7 +20,8 @@ INTERNAL_RESOURCES="${INTERNAL_RESOURCES:-0}"
 # Parse additional arguments for format and HTML options
 # Default to a rich Pandoc Markdown with helpful extensions for best results
 # Users can override with --github or --commonmark flags
-INPUT_FORMAT="markdown+tex_math_dollars+tex_math_single_backslash+smart+emoji+footnotes+definition_lists+fenced_code_attributes+link_attributes+task_lists+strikeout+pipe_tables+table_captions+auto_identifiers+implicit_header_references+hard_line_breaks"
+# Note: yaml_metadata_block disabled to prevent Pandoc from misinterpreting --- thematic breaks
+INPUT_FORMAT="markdown-yaml_metadata_block+tex_math_dollars+tex_math_single_backslash+smart+emoji+footnotes+definition_lists+fenced_code_attributes+link_attributes+task_lists+strikeout+pipe_tables+table_captions+auto_identifiers+implicit_header_references+hard_line_breaks"
 EXTRA_CSS_LINKS=()
 HTML_TITLE=""
 DOC_TITLE=""
