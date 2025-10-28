@@ -53,6 +53,18 @@ def preprocess_lines(lines: List[str]) -> List[str]:
     current_heading_level = 0  # Track deepest heading level seen
     just_converted_heading = False  # Track if we just converted a pseudo-heading
 
+    # First pass: remove trailing spaces before --- to prevent Setext heading misinterpretation
+    # This prevents Pandoc from treating "text\n---" as a Setext H1 heading
+    processed_lines = []
+    for i, line in enumerate(lines):
+        processed_lines.append(line)
+        # If this line is exactly "---" (a thematic break), check if previous line has trailing spaces
+        if i > 0 and line.strip() == '---' and processed_lines[i-1].endswith((' ', '\t')):
+            # Remove trailing whitespace from the line before ---
+            processed_lines[i-1] = processed_lines[i-1].rstrip()
+    
+    lines = processed_lines
+
     for idx, line in enumerate(lines):
         # Detect fenced code blocks, track open/close using the same marker
         fence_match = FENCE_RE.match(line)

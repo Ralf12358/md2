@@ -53,6 +53,17 @@ def shift_headings_and_add_title(file_path: Union[str, Path], title: str) -> str
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
 
+        # Remove trailing spaces before --- to prevent Setext heading misinterpretation
+        # This prevents Pandoc from treating "text\n---" as a Setext H1 heading
+        lines = content.split('\n')
+        processed_lines = []
+        for i, line in enumerate(lines):
+            processed_lines.append(line)
+            # If next line is exactly "---" (a thematic break), remove trailing spaces from current line
+            if i < len(lines) - 1 and lines[i+1].strip() == '---' and line.endswith((' ', '\t')):
+                processed_lines[-1] = line.rstrip()
+        content = '\n'.join(processed_lines)
+
         # Shift ATX-style headers (add one # to each)
         content = re.sub(r"^(#{1,6}) ", r"#\1 ", content, flags=re.MULTILINE)
 
@@ -61,6 +72,10 @@ def shift_headings_and_add_title(file_path: Union[str, Path], title: str) -> str
         content = re.sub(r"^(.+)\n=+\s*$", r"## \1", content, flags=re.MULTILINE)
         # H2 (---) becomes H3 (###)
         content = re.sub(r"^(.+)\n-+\s*$", r"### \1", content, flags=re.MULTILINE)
+
+        # Ensure no heading immediately follows ---
+        # This prevents Pandoc from misinterpreting --- as a table separator
+        content = re.sub(r"^---\n(#{1,6} )", r"---\n\n\1", content, flags=re.MULTILINE)
 
         # Add title H1 at the top
         modified_content = f"# {title}\n\n{content}"
