@@ -637,7 +637,7 @@ hr {
     }
 }
 
-/* Print-only: center first H1 (and direct text after) on page 1 */
+/* Print-only: cover page styling (TOC CSS always has TOC present) */
 @media print {
 
     /* Horizontally center the title and its immediate paragraph */
