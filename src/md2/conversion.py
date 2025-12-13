@@ -1,15 +1,162 @@
 import subprocess
 import re
+import shutil
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional, Set, Tuple, Union
 from . import runtime as rt
 import os
 
 
-def count_h1_headers(file_path: Union[str, Path]) -> int:
+def collect_local_images(file_path: str | Path) -> set[Path]:
+    """
+    Extract unique local image paths referenced in a markdown file.
+    Returns a set of absolute paths to existing image files.
+    """
+    file_path = Path(file_path).resolve()
+    base_dir = file_path.parent
+    images: set[Path] = set()
+
+    try:
+        with open(file_path, encoding="utf-8") as f:
+            content = f.read()
+
+        # Match markdown image syntax: ![alt](path) and ![alt](path "title")
+        # Also match HTML img tags: <img src="path" ...>
+        md_pattern = r'!\[[^\]]*\]\(([^)\s"]+)'
+        html_pattern = r'<img[^>]+src=["\']([^"\']+)["\']'
+
+        paths = re.findall(md_pattern, content)
+        paths += re.findall(html_pattern, content, re.IGNORECASE)
+
+        for img_path in paths:
+            # Skip URLs
+            if img_path.startswith(("http://", "https://", "data:")):
+                continue
+
+            img = Path(img_path)
+            if img.is_absolute():
+                if img.exists():
+                    images.add(img.resolve())
+            else:
+                resolved = (base_dir / img).resolve()
+                if resolved.exists():
+                    images.add(resolved)
+
+    except Exception:
+        pass
+
+    return images
+
+
+def copy_images_and_rewrite(
+    content: str, base_dir: Path, target_dir: Path
+) -> tuple[str, list[Path]]:
+    """
+    Copy external images to target_dir and rewrite paths in content.
+    Returns (modified_content, list_of_copied_files).
+    """
+    copied: list[Path] = []
+
+    # Collect all image references
+    md_pattern = r'!\[([^\]]*)\]\(([^)\s"]+)'
+
+    def md_replace(m):
+        alt = m.group(1)
+        img_path = m.group(2)
+
+        # Skip URLs
+        if img_path.startswith(("http://", "https://", "data:")):
+            return m.group(0)
+
+        img = Path(img_path)
+        if img.is_absolute():
+            src = img
+        else:
+            src = (base_dir / img).resolve()
+
+        # Check if image is outside the target directory
+        try:
+            src.relative_to(target_dir)
+            # Already in target dir, keep as-is but make relative
+            rel = src.relative_to(target_dir)
+            return f"![{alt}]({rel})"
+        except ValueError:
+            pass  # Outside target dir, need to copy
+
+        if not src.exists():
+            return m.group(0)  # Keep original if not found
+
+        # Copy to target dir with unique name if needed
+        dest_name = src.name
+        dest = target_dir / dest_name
+        counter = 1
+        while dest.exists() and dest not in copied:
+            stem = src.stem
+            suffix = src.suffix
+            dest_name = f"{stem}_{counter}{suffix}"
+            dest = target_dir / dest_name
+            counter += 1
+
+        if dest not in copied:
+            shutil.copy2(src, dest)
+            copied.append(dest)
+
+        return f"![{alt}]({dest_name})"
+
+    content = re.sub(md_pattern, md_replace, content)
+
+    # Also handle HTML img tags
+    html_pattern = r'(<img[^>]+src=["\'])([^"\']+)(["\'][^>]*>)'
+
+    def html_replace(m):
+        prefix = m.group(1)
+        img_path = m.group(2)
+        suffix = m.group(3)
+
+        if img_path.startswith(("http://", "https://", "data:")):
+            return m.group(0)
+
+        img = Path(img_path)
+        if img.is_absolute():
+            src = img
+        else:
+            src = (base_dir / img).resolve()
+
+        try:
+            src.relative_to(target_dir)
+            rel = src.relative_to(target_dir)
+            return f"{prefix}{rel}{suffix}"
+        except ValueError:
+            pass
+
+        if not src.exists():
+            return m.group(0)
+
+        dest_name = src.name
+        dest = target_dir / dest_name
+        counter = 1
+        while dest.exists() and dest not in copied:
+            stem = src.stem
+            suffix_ext = src.suffix
+            dest_name = f"{stem}_{counter}{suffix_ext}"
+            dest = target_dir / dest_name
+            counter += 1
+
+        if dest not in copied:
+            shutil.copy2(src, dest)
+            copied.append(dest)
+
+        return f"{prefix}{dest_name}{suffix}"
+
+    content = re.sub(html_pattern, html_replace, content, flags=re.IGNORECASE)
+
+    return content, copied
+
+
+def count_h1_headers(file_path: str | Path) -> int:
     """Count the number of H1 headers in a markdown file."""
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
         # Count ATX-style headers (# Header)
@@ -23,10 +170,10 @@ def count_h1_headers(file_path: Union[str, Path]) -> int:
         return 0
 
 
-def extract_first_h1_title(file_path: Union[str, Path]) -> Optional[str]:
+def extract_first_h1_title(file_path: str | Path) -> str | None:
     """Extract the text of the first H1 header in a markdown file."""
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
         # Look for ATX-style header first (# Header)
@@ -44,13 +191,13 @@ def extract_first_h1_title(file_path: Union[str, Path]) -> Optional[str]:
         return None
 
 
-def shift_headings_and_add_title(file_path: Union[str, Path], title: str) -> str:
+def shift_headings_and_add_title(file_path: str | Path, title: str) -> str:
     """
     Shift all headings down by one level and add a title H1 at the top.
     Returns the modified markdown content.
     """
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
         # Remove trailing spaces before --- to prevent Setext heading misinterpretation
@@ -88,12 +235,12 @@ def shift_headings_and_add_title(file_path: Union[str, Path], title: str) -> str
 
     except Exception:
         # If anything fails, return original content
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             return f.read()
 
 
 def determine_document_title(
-    file_path: Union[str, Path], title_override: Optional[str] = None
+    file_path: str | Path, title_override: str | None = None
 ) -> str:
     """
     Determine the document title based on the following priority:
@@ -115,18 +262,18 @@ def determine_document_title(
 
 
 def md2html(
-    input_paths: List[Union[str, Path]],
-    css: Optional[str] = None,
+    input_paths: list[str | Path],
+    css: str | None = None,
     dialect: str = "pandoc",
-    markdown_flags: Optional[List[str]] = None,
-    html_title: Optional[str] = None,
-    title: Optional[str] = None,
-    html_css: Optional[str] = None,
-    runtime: Optional[str] = None,
+    markdown_flags: list[str] | None = None,
+    html_title: str | None = None,
+    title: str | None = None,
+    html_css: str | None = None,
+    runtime: str | None = None,
     ensure: bool = True,
     self_contained: bool = True,  # Default True: embeds MathJax + resources for offline use
     add_toc_placeholders: bool = False,
-) -> List[Path]:
+) -> list[Path]:
 
     if markdown_flags is None:
         markdown_flags = ["--toc"]  # TOC enabled by default
@@ -159,7 +306,7 @@ def md2html(
         abs_in = p.resolve()
 
         # Check for remote images and validate if present
-        with open(abs_in, "r", encoding="utf-8") as f:
+        with open(abs_in, encoding="utf-8") as f:
             content = f.read()
 
         # Only validate if there are HTTP/HTTPS images
@@ -195,16 +342,31 @@ def md2html(
         # Handle multiple H1s by shifting headings and adding title
         h1_count = count_h1_headers(abs_in)
         temp_file = None
-        if h1_count > 1:
-            # Create temporary file with shifted headings in container
-            modified_content = shift_headings_and_add_title(abs_in, actual_title)
+        copied_images: list[Path] = []
+
+        # Check if we need to copy external images or shift headings
+        external_images = collect_local_images(abs_in)
+        external_images = {
+            img for img in external_images if not str(img).startswith(str(in_dir))
+        }
+
+        if h1_count > 1 or external_images:
             import uuid
+
+            if h1_count > 1:
+                modified_content = shift_headings_and_add_title(abs_in, actual_title)
+            else:
+                modified_content = content  # already read above
+
+            # Copy external images to work dir and rewrite paths
+            if external_images:
+                modified_content, copied_images = copy_images_and_rewrite(
+                    modified_content, abs_in.parent, in_dir
+                )
 
             temp_name = f"tmp_{uuid.uuid4().hex[:8]}.md"
             temp_file = in_dir / temp_name
             temp_file.write_text(modified_content, encoding="utf-8")
-
-            # Use the temporary file for conversion
             container_in = f"/work/{temp_name}"
         else:
             container_in = f"/work/{abs_in.name}"
@@ -287,20 +449,23 @@ def md2html(
         cmd += inner
         subprocess.run(cmd, check=True)
 
-        # Clean up temporary file if created
+        # Clean up temporary file and copied images
         if temp_file and temp_file.exists():
             temp_file.unlink()
+        for img in copied_images:
+            if img.exists():
+                img.unlink()
 
         results.append(out_abs)
     return results
 
 
 def html2pdf(
-    input_paths: List[Union[str, Path]],
-    runtime: Optional[str] = None,
+    input_paths: list[str | Path],
+    runtime: str | None = None,
     ensure: bool = True,
     page_numbers: bool = True,
-) -> List[Path]:
+) -> list[Path]:
     runtime = runtime or rt.get_container_runtime()
     if ensure:
         rt.ensure_image(runtime, rt.PROJECT_ROOT)
@@ -335,18 +500,18 @@ def html2pdf(
 
 
 def md2pdf(
-    input_paths: List[Union[str, Path]],
-    css: Optional[str] = None,
+    input_paths: list[str | Path],
+    css: str | None = None,
     dialect: str = "pandoc",
-    markdown_flags: Optional[List[str]] = None,
-    html_title: Optional[str] = None,
-    title: Optional[str] = None,
-    html_css: Optional[str] = None,
-    runtime: Optional[str] = None,
+    markdown_flags: list[str] | None = None,
+    html_title: str | None = None,
+    title: str | None = None,
+    html_css: str | None = None,
+    runtime: str | None = None,
     ensure: bool = True,
     self_contained: bool = True,  # Default True: embeds MathJax + resources for offline use
     page_numbers: bool = True,
-) -> List[Path]:
+) -> list[Path]:
     # Generate clean HTML first (without TOC placeholders)
     html_paths = md2html(
         input_paths=input_paths,
@@ -378,18 +543,18 @@ def _styles_dir() -> Path:
 
 
 def md2docx(
-    input_paths: List[Union[str, Path]],
+    input_paths: list[str | Path],
     dialect: str = "pandoc",
-    markdown_flags: Optional[List[str]] = None,
-    title: Optional[str] = None,
-    reference_doc: Optional[Union[str, Path]] = None,
-    runtime: Optional[str] = None,
+    markdown_flags: list[str] | None = None,
+    title: str | None = None,
+    reference_doc: str | Path | None = None,
+    runtime: str | None = None,
     ensure: bool = True,
-) -> List[Path]:
+) -> list[Path]:
     if markdown_flags is None:
         markdown_flags = ["--toc"]
 
-    processed_flags: List[str] = []
+    processed_flags: list[str] = []
     toc_disabled = False
     for flag in markdown_flags:
         if flag == "--no-toc":
@@ -406,7 +571,7 @@ def md2docx(
     if ensure:
         rt.ensure_image(runtime, rt.PROJECT_ROOT)
 
-    results: List[Path] = []
+    results: list[Path] = []
     for p in input_paths:
         p = Path(p).resolve()
         abs_in = p.resolve()
