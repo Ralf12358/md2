@@ -138,6 +138,10 @@ if command -v mermaid >/dev/null 2>&1; then
 fi
 pandoc "${OPTS[@]}" ${FILTERS[@]} "$PRE_MD" -o "$OUT"
 
+# Add body class 'no-toc' when TOC is disabled (for CSS styling)
+if [[ "$ENABLE_TOC" != "1" ]]; then
+  sed -i 's/<body/<body class="no-toc"/' "$OUT" || true
+fi
 
 # When linking CSS, also make MathJax available next to the HTML so the file:// URL works reliably.
 if [[ "$LINK_CSS" == "1" ]]; then

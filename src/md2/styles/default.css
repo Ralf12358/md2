@@ -701,32 +701,32 @@ hr {
     }
 }
 
-/* Print-only: cover page styling ONLY when TOC is present */
+/* Print-only: cover page styling ONLY when TOC is present (body without .no-toc class) */
 @media print {
 
     /* Horizontally center the title and its immediate paragraph (only with TOC) */
-    body:has(nav#TOC)>h1:first-of-type,
-    body:has(nav#TOC)>section.level1:first-of-type>h1:first-of-type,
-    body:has(nav#TOC)>h1:first-of-type+p,
-    body:has(nav#TOC)>section.level1:first-of-type>h1:first-of-type+p {
+    body:not(.no-toc)>h1:first-of-type,
+    body:not(.no-toc)>section.level1:first-of-type>h1:first-of-type,
+    body:not(.no-toc)>h1:first-of-type+p,
+    body:not(.no-toc)>section.level1:first-of-type>h1:first-of-type+p {
         text-align: center;
     }
 
     /* Approximate vertical centering by pushing title down (only with TOC) */
-    body:has(nav#TOC)>h1:first-of-type,
-    body:has(nav#TOC)>section.level1:first-of-type>h1:first-of-type {
+    body:not(.no-toc)>h1:first-of-type,
+    body:not(.no-toc)>section.level1:first-of-type>h1:first-of-type {
         margin-top: 35vh;
     }
 
     /* Keep the lead paragraph close to the title (only with TOC) */
-    body:has(nav#TOC)>h1:first-of-type+p,
-    body:has(nav#TOC)>section.level1:first-of-type>h1:first-of-type+p {
+    body:not(.no-toc)>h1:first-of-type+p,
+    body:not(.no-toc)>section.level1:first-of-type>h1:first-of-type+p {
         margin-top: 0.6em;
     }
 
     /* Cancel older break-after trick (only with TOC) */
-    body:has(nav#TOC)>h1:first-of-type+p::after,
-    body:has(nav#TOC)>section.level1:first-of-type>h1:first-of-type+p::after {
+    body:not(.no-toc)>h1:first-of-type+p::after,
+    body:not(.no-toc)>section.level1:first-of-type>h1:first-of-type+p::after {
         content: none;
         display: none;
         break-after: auto;
@@ -734,8 +734,8 @@ hr {
     }
 
     /* Move FIRST H2 to the next page for title page (only with TOC) */
-    body:has(nav#TOC)>h1:first-of-type~h2:first-of-type,
-    body:has(nav#TOC)>section.level1:first-of-type>h1:first-of-type~h2:first-of-type {
+    body:not(.no-toc)>h1:first-of-type~h2:first-of-type,
+    body:not(.no-toc)>section.level1:first-of-type>h1:first-of-type~h2:first-of-type {
         break-before: page;
         page-break-before: always;
     }
@@ -743,26 +743,26 @@ hr {
     /* TOC-specific rules are defined in default.toc.css */
 
     /* Keep typical intro blocks intact on the title page (only with TOC) */
-    body:has(nav#TOC)>h1:first-of-type~pre,
-    body:has(nav#TOC)>h1:first-of-type~table,
-    body:has(nav#TOC)>h1:first-of-type~figure,
-    body:has(nav#TOC)>h1:first-of-type~.math.display,
-    body:has(nav#TOC)>h1:first-of-type~.katex-display,
-    body:has(nav#TOC)>h1:first-of-type~.mjx-container[display="true"],
-    body:has(nav#TOC)>h1:first-of-type~p,
-    body:has(nav#TOC)>h1:first-of-type~ul,
-    body:has(nav#TOC)>h1:first-of-type~ol,
-    body:has(nav#TOC)>h1:first-of-type~blockquote,
-    body:has(nav#TOC)>section.level1:first-of-type>h1:first-of-type~pre,
-    body:has(nav#TOC)>section.level1:first-of-type>h1:first-of-type~table,
-    body:has(nav#TOC)>section.level1:first-of-type>h1:first-of-type~figure,
-    body:has(nav#TOC)>section.level1:first-of-type>h1:first-of-type~.math.display,
-    body:has(nav#TOC)>section.level1:first-of-type>h1:first-of-type~.katex-display,
-    body:has(nav#TOC)>section.level1:first-of-type>h1:first-of-type~.mjx-container[display="true"],
-    body:has(nav#TOC)>section.level1:first-of-type>h1:first-of-type~p,
-    body:has(nav#TOC)>section.level1:first-of-type>h1:first-of-type~ul,
-    body:has(nav#TOC)>section.level1:first-of-type>h1:first-of-type~ol,
-    body:has(nav#TOC)>section.level1:first-of-type>h1:first-of-type~blockquote {
+    body:not(.no-toc)>h1:first-of-type~pre,
+    body:not(.no-toc)>h1:first-of-type~table,
+    body:not(.no-toc)>h1:first-of-type~figure,
+    body:not(.no-toc)>h1:first-of-type~.math.display,
+    body:not(.no-toc)>h1:first-of-type~.katex-display,
+    body:not(.no-toc)>h1:first-of-type~.mjx-container[display="true"],
+    body:not(.no-toc)>h1:first-of-type~p,
+    body:not(.no-toc)>h1:first-of-type~ul,
+    body:not(.no-toc)>h1:first-of-type~ol,
+    body:not(.no-toc)>h1:first-of-type~blockquote,
+    body:not(.no-toc)>section.level1:first-of-type>h1:first-of-type~pre,
+    body:not(.no-toc)>section.level1:first-of-type>h1:first-of-type~table,
+    body:not(.no-toc)>section.level1:first-of-type>h1:first-of-type~figure,
+    body:not(.no-toc)>section.level1:first-of-type>h1:first-of-type~.math.display,
+    body:not(.no-toc)>section.level1:first-of-type>h1:first-of-type~.katex-display,
+    body:not(.no-toc)>section.level1:first-of-type>h1:first-of-type~.mjx-container[display="true"],
+    body:not(.no-toc)>section.level1:first-of-type>h1:first-of-type~p,
+    body:not(.no-toc)>section.level1:first-of-type>h1:first-of-type~ul,
+    body:not(.no-toc)>section.level1:first-of-type>h1:first-of-type~ol,
+    body:not(.no-toc)>section.level1:first-of-type>h1:first-of-type~blockquote {
         break-inside: avoid-page;
         page-break-inside: avoid;
         break-before: avoid-page;
