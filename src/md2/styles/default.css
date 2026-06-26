@@ -71,8 +71,9 @@
     /* LETTER MODE SETTINGS (adjust for windowed envelopes) */
     --letter-page-margin-top: 18mm;
     --letter-page-margin-left: 20mm;
-    --letter-window-top: 57mm;
-    --letter-window-left: 15mm;
+    --letter-sender-line-top: 37mm;
+    --letter-window-top: 61mm;
+    --letter-window-left: 12mm;
     --letter-window-width: 85mm;
     --letter-sender-line-font-size: 7.5pt;
     --letter-address-font-size: 11pt;
@@ -100,7 +101,7 @@ body.letter {
 
 .md2-letter-sender-line {
     position: absolute;
-    top: calc(var(--letter-window-top) - 20mm);
+    top: var(--letter-sender-line-top);
     left: var(--letter-window-left);
     width: var(--letter-window-width);
     font-size: var(--letter-sender-line-font-size);
