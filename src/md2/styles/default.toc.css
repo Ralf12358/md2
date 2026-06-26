@@ -723,6 +723,19 @@ hr {
     }
 }
 
+@media print {
+
+    body.letter h1,
+    body.letter section.level1 {
+        break-before: auto !important;
+        page-break-before: auto !important;
+        break-after: auto !important;
+        page-break-after: auto !important;
+        break-inside: auto !important;
+        page-break-inside: auto !important;
+    }
+}
+
 /* Print: loosen spacing for list items with inline math */
 @media print {
 
@@ -1201,6 +1214,21 @@ nav#TOC>ul>li>ul>li>ul>li::before,
         border: none;
         break-after: page;
         page-break-after: always;
+    }
+
+    body.letter h1,
+    body.letter h1+*,
+    body.letter section.level1 {
+        break-before: auto !important;
+        page-break-before: auto !important;
+        break-after: auto !important;
+        page-break-after: auto !important;
+        break-inside: auto !important;
+        page-break-inside: auto !important;
+    }
+
+    body.letter section.level1 {
+        display: contents;
     }
 
 }
