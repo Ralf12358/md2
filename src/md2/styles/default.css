@@ -71,7 +71,7 @@
     /* LETTER MODE SETTINGS (adjust for windowed envelopes) */
     --letter-page-margin-top: 18mm;
     --letter-page-margin-left: 20mm;
-    --letter-window-top: 60mm;
+    --letter-window-top: 57mm;
     --letter-window-left: 15mm;
     --letter-window-width: 85mm;
     --letter-sender-line-font-size: 7.5pt;
