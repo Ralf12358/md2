@@ -273,10 +273,18 @@ def md2html(
     ensure: bool = True,
     self_contained: bool = True,  # Default True: embeds MathJax + resources for offline use
     add_toc_placeholders: bool = False,
+    letter: bool = False,
 ) -> list[Path]:
 
     if markdown_flags is None:
         markdown_flags = ["--toc"]  # TOC enabled by default
+
+    if letter:
+        forbidden_flags = {"--fno-html", "--fno-html-blocks"}
+        active_forbidden_flags = forbidden_flags.intersection(markdown_flags)
+        if active_forbidden_flags:
+            names = ", ".join(sorted(active_forbidden_flags))
+            raise ValueError(f"--letter cannot be combined with {names}")
 
     # Process flags to remove --no-toc and ensure --toc is default
     processed_flags = []
@@ -284,8 +292,13 @@ def md2html(
     for flag in markdown_flags:
         if flag == "--no-toc":
             toc_disabled = True
+        elif letter and (flag == "--toc" or flag.startswith("--toc-depth=")):
+            continue
         else:
             processed_flags.append(flag)
+
+    if letter:
+        toc_disabled = True
 
     # Add --toc if not disabled and not already present
     if not toc_disabled and "--toc" not in processed_flags:
@@ -425,6 +438,9 @@ def md2html(
         if markdown_flags:
             inner.extend(markdown_flags)
 
+        if letter:
+            inner.extend(["--letter"])
+
         # Add HTML options - priority: title > html_title > auto-detected title
         if title:
             # --title overrides everything for HTML title
@@ -511,6 +527,7 @@ def md2pdf(
     ensure: bool = True,
     self_contained: bool = True,  # Default True: embeds MathJax + resources for offline use
     page_numbers: bool = True,
+    letter: bool = False,
 ) -> list[Path]:
     # Generate clean HTML first (without TOC placeholders)
     html_paths = md2html(
@@ -525,6 +542,7 @@ def md2pdf(
         ensure=ensure,
         self_contained=self_contained,
         add_toc_placeholders=False,  # Keep HTML clean
+        letter=letter,
     )
 
     # Convert HTML to PDF (container handles all PDF processing including temp files)

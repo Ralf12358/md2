@@ -28,6 +28,7 @@ DOC_TITLE=""
 ENABLE_TOC=0
 TOC_DEPTH=""
 ADD_TOC_PLACEHOLDERS=false
+LETTER_MODE=0
 
 # If a third positional arg exists and is not an option, treat it as CSS
 if [[ $# -ge 3 && "${3}" != --* ]]; then
@@ -65,12 +66,22 @@ while [[ $# -gt 0 ]]; do
     --add-toc-placeholders)
       ADD_TOC_PLACEHOLDERS=true
       ;;
+    --letter)
+      LETTER_MODE=1
+      ENABLE_TOC=0
+      TOC_DEPTH=""
+      ;;
     *)
       # Ignore unknown arguments for now (markdown extension flags are not translated here)
       ;;
   esac
   shift
 done
+
+if [[ "$LETTER_MODE" == "1" ]]; then
+  ENABLE_TOC=0
+  TOC_DEPTH=""
+fi
 
 # Auto-upgrade to GFM if input looks like a pipe-table and format is commonmark
 # No auto-switching: CommonMark-X already supports pipe_tables
@@ -90,6 +101,15 @@ if [[ -f /scripts/preprocess_md.py ]]; then
   python3 /scripts/preprocess_md.py "$IN" "$PRE_MD" || cp -f "$IN" "$PRE_MD"
 else
   cp -f "$IN" "$PRE_MD"
+fi
+
+PANDOC_IN="$PRE_MD"
+if [[ "$LETTER_MODE" == "1" ]]; then
+  LETTER_MD="/tmp/letter_$(basename "$IN")"
+  python3 /scripts/letter_preprocess.py "$PRE_MD" "$LETTER_MD"
+  PANDOC_IN="$LETTER_MD"
+  ENABLE_TOC=0
+  TOC_DEPTH=""
 fi
 
 OPTS=(
@@ -136,11 +156,13 @@ FILTERS=()
 if command -v mermaid >/dev/null 2>&1; then
   FILTERS+=(--lua-filter=/filters/mermaid.lua)
 fi
-pandoc "${OPTS[@]}" ${FILTERS[@]} "$PRE_MD" -o "$OUT"
+pandoc "${OPTS[@]}" ${FILTERS[@]} "$PANDOC_IN" -o "$OUT"
 
-# Add body class 'no-toc' when TOC is disabled (for CSS styling)
-if [[ "$ENABLE_TOC" != "1" ]]; then
-  sed -i 's/<body/<body class="no-toc"/' "$OUT" || true
+# Add strict body classes for CSS styling.
+if [[ "$LETTER_MODE" == "1" ]]; then
+  python3 /scripts/html_body_classes.py "$OUT" letter no-toc
+elif [[ "$ENABLE_TOC" != "1" ]]; then
+  python3 /scripts/html_body_classes.py "$OUT" no-toc
 fi
 
 # When linking CSS, also make MathJax available next to the HTML so the file:// URL works reliably.

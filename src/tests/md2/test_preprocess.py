@@ -14,16 +14,16 @@ def _load_preprocess_module():
 
 def test_inserts_blank_line_before_dash_list():
     mod = _load_preprocess_module()
-    src = ["**huhu**", "- a", "- b"]
+    src = ["huhu", "- a", "- b"]
     out = mod.preprocess_lines(src)
-    assert out == ["**huhu**", "", "- a", "- b"]
+    assert out == ["huhu", "", "- a", "- b"]
 
 
 def test_inserts_blank_line_before_star_list():
     mod = _load_preprocess_module()
-    src = ["**title**", "* a", "* b"]
+    src = ["title", "* a", "* b"]
     out = mod.preprocess_lines(src)
-    assert out == ["**title**", "", "* a", "* b"]
+    assert out == ["title", "", "* a", "* b"]
 
 
 def test_idempotent_on_repeated_runs():
@@ -41,7 +41,7 @@ def test_does_not_modify_inside_fences():
         "**huhu**",
         "- a",
         "```",
-        "**ok**",
+        "ok",
         "- a",
     ]
     out = mod.preprocess_lines(src)
@@ -51,7 +51,7 @@ def test_does_not_modify_inside_fences():
         "**huhu**",
         "- a",
         "```",
-        "**ok**",
+        "ok",
         "",
         "- a",
     ]

@@ -1,5 +1,7 @@
 from pathlib import Path
+import pytest
 import md2.conversion as conv
+import md2.cli as cli
 import md2.runtime as rt
 import subprocess
 
@@ -84,6 +86,107 @@ def test_toc_can_be_disabled(monkeypatch, tmp_path):
     assert (
         "--no-toc" not in rec.cmds[0]
     )  # --no-toc is processed by our code, not passed to pandoc
+
+
+def test_md2html_letter_passes_letter_and_disables_toc(monkeypatch, tmp_path):
+    f = tmp_path / "letter.md"
+    f.write_text("# Letter")
+    rec = Recorder()
+    monkeypatch.setattr(conv.subprocess, "run", rec)
+    monkeypatch.setattr(rt, "ensure_image", lambda runtime, root: None)
+    monkeypatch.setattr(rt, "get_container_runtime", lambda: "docker")
+
+    conv.md2html([f], markdown_flags=["--toc", "--toc-depth=2"], letter=True)
+
+    cmd = rec.cmds[0]
+    assert "--letter" in cmd
+    assert "--toc" not in cmd
+    assert "--toc-depth=2" not in cmd
+
+
+def test_md2html_letter_rejects_html_block_suppression(tmp_path):
+    f = tmp_path / "letter.md"
+    f.write_text("# Letter")
+
+    with pytest.raises(ValueError, match="--letter cannot be combined"):
+        conv.md2html([f], markdown_flags=["--fno-html-blocks"], letter=True, ensure=False)
+
+
+def test_md2html_letter_rejects_html_suppression(tmp_path):
+    f = tmp_path / "letter.md"
+    f.write_text("# Letter")
+
+    with pytest.raises(ValueError, match="--letter cannot be combined"):
+        conv.md2html([f], markdown_flags=["--fno-html"], letter=True, ensure=False)
+
+
+def test_md2pdf_letter_passes_letter_to_html_generation(monkeypatch, tmp_path):
+    f = tmp_path / "letter.md"
+    f.write_text("# Letter")
+    rec = Recorder()
+    monkeypatch.setattr(conv.subprocess, "run", rec)
+    monkeypatch.setattr(rt, "ensure_image", lambda runtime, root: None)
+    monkeypatch.setattr(rt, "get_container_runtime", lambda: "docker")
+
+    conv.md2pdf([f], letter=True)
+
+    assert len(rec.cmds) == 2
+    assert "--letter" in rec.cmds[0]
+    assert "pdf_generator.sh" in str(rec.cmds[1])
+
+
+def test_main_md2html_parses_letter(monkeypatch, tmp_path):
+    f = tmp_path / "letter.md"
+    f.write_text("# Letter")
+    calls = []
+    monkeypatch.setattr(cli, "md2html", lambda *args, **kwargs: calls.append(kwargs))
+
+    cli.main_md2html(["--letter", "--toc-depth=2", str(f)])
+
+    assert calls[0]["letter"] is True
+    assert "--no-toc" in calls[0]["markdown_flags"]
+    assert "--toc" not in calls[0]["markdown_flags"]
+    assert "--toc-depth=2" not in calls[0]["markdown_flags"]
+
+
+def test_main_md2pdf_parses_letter(monkeypatch, tmp_path):
+    f = tmp_path / "letter.md"
+    f.write_text("# Letter")
+    calls = []
+    monkeypatch.setattr(cli, "md2pdf", lambda *args, **kwargs: calls.append(kwargs))
+
+    cli.main_md2pdf(["--letter", str(f)])
+
+    assert calls[0]["letter"] is True
+    assert "--no-toc" in calls[0]["markdown_flags"]
+
+
+def test_main_md2html_rejects_incompatible_letter_flags(monkeypatch, tmp_path, capsys):
+    f = tmp_path / "letter.md"
+    f.write_text("# Letter")
+    calls = []
+    monkeypatch.setattr(cli, "md2html", lambda *args, **kwargs: calls.append(kwargs))
+
+    with pytest.raises(SystemExit) as exc:
+        cli.main_md2html(["--letter", "--fno-html", str(f)])
+
+    assert exc.value.code == 2
+    assert calls == []
+    assert "--letter cannot be combined with --fno-html" in capsys.readouterr().err
+
+
+def test_main_md2pdf_rejects_incompatible_letter_flags(monkeypatch, tmp_path, capsys):
+    f = tmp_path / "letter.md"
+    f.write_text("# Letter")
+    calls = []
+    monkeypatch.setattr(cli, "md2pdf", lambda *args, **kwargs: calls.append(kwargs))
+
+    with pytest.raises(SystemExit) as exc:
+        cli.main_md2pdf(["--letter", "--fno-html-blocks", str(f)])
+
+    assert exc.value.code == 2
+    assert calls == []
+    assert "--letter cannot be combined with --fno-html-blocks" in capsys.readouterr().err
 
 
 def test_md2docx_basic(monkeypatch, tmp_path):

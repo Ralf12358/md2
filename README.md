@@ -55,6 +55,7 @@ md2html --github notes.md
 md2html --ftables --fstrikethrough file.md
 md2html --html-title="My Document" --html-css="custom.css" file.md
 md2html --title="Custom Title" file.md  # Override automatic title detection
+md2html --letter letter.md
 md2html a.md b.md c.md
 ```
 
@@ -67,7 +68,61 @@ md2pdf --html-title="Report" doc.md
 md2pdf --title="Annual Report 2025" doc.md  # Override automatic title detection
 md2pdf --toc-depth=2 doc.md
 md2pdf --no-page-numbers doc.md  # Disable page numbers (enabled by default)
+md2pdf --letter --no-page-numbers letter.md
 ```
+
+### Letter mode for windowed envelopes
+
+`--letter` formats the first page as a professional letter for a windowed envelope. It is available for `md2html` and `md2pdf` and automatically disables the table of contents.
+
+Required top-level tags:
+
+- `<sender>...</sender>`
+- `<receiver>...</receiver>`
+
+Optional top-level tags:
+
+- `<senderline>...</senderline>` overrides the repeated sender line above the receiver address.
+- `<date>...</date>`
+- `<email>...</email>`
+- `<phone>...</phone>`
+- `<reference>...</reference>`
+
+Unknown or misspelled XML-like tags in the letter metadata block are errors. For example, `<reciver>` fails; use `<receiver>`.
+
+```markdown
+<sender>
+Ralf Schneider
+Verschaffeltstraße 14
+68723 Schwetzingen
+</sender>
+
+<receiver>
+Netze BW GmbH
+Schelmenwasenstraße 15
+70567 Stuttgart
+</receiver>
+
+<email>
+ralf@example.org
+</email>
+
+<phone>
++49 123 456789
+</phone>
+
+<date>
+26.06.2026
+</date>
+
+# Betreff
+
+Sehr geehrte Damen und Herren,
+
+...
+```
+
+Letter positioning is controlled by CSS variables in the default stylesheets, such as `--letter-window-top`, `--letter-window-left`, `--letter-window-width`, and `--letter-meta-left`. Copy the default CSS or pass `--css` to fine-tune envelope alignment.
 
 #### TOC Page Numbers (PDF only)
 - Page numbers in the Table of Contents are applied during the PDF post-processing step only.

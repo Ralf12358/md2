@@ -5,6 +5,17 @@ from .conversion import md2html, md2pdf, html2pdf, md2docx
 from . import runtime as rt
 
 
+LETTER_INCOMPATIBLE_MARKDOWN_FLAGS = {"--fno-html", "--fno-html-blocks"}
+
+
+def _reject_incompatible_letter_flags(markdown_flags: List[str]) -> None:
+    active = LETTER_INCOMPATIBLE_MARKDOWN_FLAGS.intersection(markdown_flags)
+    if active:
+        names = ", ".join(sorted(active))
+        print(f"--letter cannot be combined with {names}", file=sys.stderr)
+        sys.exit(2)
+
+
 def usage_md2html() -> None:
     usage = """Usage: md2html [options] file1.md [file2.md ...]
 
@@ -50,6 +61,7 @@ HTML generator options:
                        Do not translate entities
     --no-toc         Disable Table of Contents (default: enabled)
     --toc-depth=N    TOC depth (levels), default per Pandoc
+    --letter         Format as a professional letter for a windowed envelope; disables TOC
       --html-title=TITLE Sets the title of the document
       --title=TITLE    Sets the title of the document (overrides auto-detection and html-title)
       --html-css=URL   In full HTML or XHTML mode add a css link
@@ -69,6 +81,7 @@ def main_md2html(argv: Optional[List[str]] = None) -> None:
     html_title = None
     title = None
     html_css = None
+    letter = False
     files = []
     i = 0
 
@@ -96,8 +109,17 @@ def main_md2html(argv: Optional[List[str]] = None) -> None:
             if "--no-toc" not in markdown_flags:
                 markdown_flags.append("--no-toc")
             i += 1
+        elif arg == "--letter":
+            letter = True
+            markdown_flags = [
+                f for f in markdown_flags if f != "--toc" and not f.startswith("--toc-depth=")
+            ]
+            if "--no-toc" not in markdown_flags:
+                markdown_flags.append("--no-toc")
+            i += 1
         elif arg.startswith("--toc-depth="):
-            markdown_flags.append(arg)
+            if not letter:
+                markdown_flags.append(arg)
             i += 1
         elif arg == "--commonmark":
             dialect = "commonmark"
@@ -137,6 +159,9 @@ def main_md2html(argv: Optional[List[str]] = None) -> None:
     if not files:
         usage_md2html()
 
+    if letter:
+        _reject_incompatible_letter_flags(markdown_flags)
+
     md2html(
         [Path(f) for f in files],
         css=css_path,
@@ -145,6 +170,7 @@ def main_md2html(argv: Optional[List[str]] = None) -> None:
         html_title=html_title,
         title=title,
         html_css=html_css,
+        letter=letter,
     )
 
 
@@ -193,6 +219,7 @@ HTML generator options:
                        Do not translate entities
     --no-toc         Disable Table of Contents (default: enabled)
     --toc-depth=N    TOC depth (levels), default per Pandoc
+    --letter         Format as a professional letter for a windowed envelope; disables TOC
       --html-title=TITLE Sets the title of the document
       --title=TITLE    Sets the title of the document (overrides auto-detection and html-title)
       --html-css=URL   In full HTML or XHTML mode add a css link
@@ -216,6 +243,7 @@ def main_md2pdf(argv: Optional[List[str]] = None) -> None:
     title = None
     html_css = None
     page_numbers = True
+    letter = False
     files = []
     i = 0
 
@@ -246,8 +274,17 @@ def main_md2pdf(argv: Optional[List[str]] = None) -> None:
         elif arg == "--no-page-numbers":
             page_numbers = False
             i += 1
+        elif arg == "--letter":
+            letter = True
+            markdown_flags = [
+                f for f in markdown_flags if f != "--toc" and not f.startswith("--toc-depth=")
+            ]
+            if "--no-toc" not in markdown_flags:
+                markdown_flags.append("--no-toc")
+            i += 1
         elif arg.startswith("--toc-depth="):
-            markdown_flags.append(arg)
+            if not letter:
+                markdown_flags.append(arg)
             i += 1
         elif arg == "--commonmark":
             dialect = "commonmark"
@@ -287,6 +324,9 @@ def main_md2pdf(argv: Optional[List[str]] = None) -> None:
     if not files:
         usage_md2pdf()
 
+    if letter:
+        _reject_incompatible_letter_flags(markdown_flags)
+
     md2pdf(
         [Path(f) for f in files],
         css=css_path,
@@ -296,6 +336,7 @@ def main_md2pdf(argv: Optional[List[str]] = None) -> None:
         title=title,
         html_css=html_css,
         page_numbers=page_numbers,
+        letter=letter,
     )
 
 

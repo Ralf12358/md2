@@ -67,11 +67,89 @@
     --print-h5-mb: 0.45em;
     --print-h6-mt: 1em;
     --print-h6-mb: 0.45em;
+
+    /* LETTER MODE SETTINGS (adjust for windowed envelopes) */
+    --letter-page-margin-top: 18mm;
+    --letter-page-margin-left: 20mm;
+    --letter-window-top: 35mm;
+    --letter-window-left: 20mm;
+    --letter-window-width: 85mm;
+    --letter-sender-line-font-size: 7.5pt;
+    --letter-address-font-size: 11pt;
+    --letter-meta-left: 130mm;
+    --letter-meta-top: 15mm;
+    --letter-body-top-spacing: 35mm;
 }
 
 html {
     background: var(--color-bg);
     color: var(--color-fg);
+}
+
+body.letter {
+    max-width: none;
+    counter-reset: h2 h3;
+}
+
+.md2-letter-header {
+    position: relative;
+    min-height: calc(var(--letter-window-top) + var(--letter-body-top-spacing));
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+.md2-letter-sender-line {
+    position: absolute;
+    top: calc(var(--letter-window-top) - 20mm);
+    left: var(--letter-window-left);
+    width: var(--letter-window-width);
+    font-size: var(--letter-sender-line-font-size);
+    line-height: 1.15;
+    color: var(--color-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.md2-letter-receiver {
+    position: absolute;
+    top: var(--letter-window-top);
+    left: var(--letter-window-left);
+    width: var(--letter-window-width);
+    font-size: var(--letter-address-font-size);
+    line-height: 1.3;
+}
+
+.md2-letter-meta {
+    position: absolute;
+    top: var(--letter-meta-top);
+    left: var(--letter-meta-left);
+    margin: 0;
+    font-size: 9pt;
+    line-height: 1.35;
+}
+
+.md2-letter-meta>div {
+    margin: 0 0 2.2mm;
+}
+
+.md2-letter-meta dt {
+    font-weight: 600;
+    margin: 0;
+}
+
+.md2-letter-meta dd {
+    margin: 0;
+}
+
+body.letter nav#TOC {
+    display: none !important;
+}
+
+body.letter h1:first-of-type {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0 0 1.2em;
 }
 
 body {
@@ -92,6 +170,16 @@ body {
 
     body {
         background: var(--color-bg);
+    }
+}
+
+@media print {
+    body.letter {
+        padding: 0;
+    }
+
+    body.letter h1:first-of-type {
+        margin-top: 0;
     }
 }
 
@@ -461,6 +549,16 @@ hr {
         padding: var(--print-page-padding-block) var(--print-page-padding-inline);
         font-size: var(--print-base-size) !important;
         line-height: var(--print-line-height);
+    }
+
+    body.letter {
+        padding: 0 !important;
+    }
+
+    body.letter h1:first-of-type {
+        font-size: 1rem !important;
+        font-weight: 700;
+        margin: 0 0 1.2em !important;
     }
 
     a {
